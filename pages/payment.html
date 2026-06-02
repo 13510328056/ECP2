@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MOMO 支付 - 加纳精品商城</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        body { background-color: #f3f4f6; }
+        .mobile-container { width: 375px; height: 812px; margin: 0 auto; background: white; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #ddd; }
+        .pin-dot.filled { background-color: #000; border-color: #000; }
+        .num-pad button { height: 60px; font-size: 24px; font-weight: bold; border-radius: 12px; transition: all 0.1s; }
+        .num-pad button:active { background-color: #f3f4f6; transform: scale(0.95); }
+    </style>
+</head>
+<body>
+<div class="mobile-container flex flex-col">
+<!-- Header -->
+<header class="p-4 flex items-center justify-between border-b border-gray-50">
+<button onclick="history.back()"><iconify-icon class="text-2xl text-gray-400" icon="mdi:close"></iconify-icon></button>
+<a href="home.html"><img alt="Li's" class="h-8 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<span class="font-bold text-gray-800">MTN Mobile Money</span>
+<div class="w-6"></div>
+</header>
+<!-- Payment Info -->
+<div class="p-8 text-center">
+<div class="w-16 h-16 bg-yellow-400 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm">
+<span class="font-black text-xl">MTN</span>
+</div>
+<p class="text-gray-400 text-sm">支付给 GH Elite Store</p>
+<h2 class="text-4xl font-black text-gray-900 mt-2">₵5,975.00</h2>
+</div>
+<!-- PIN Entry Area -->
+<div class="flex-1 flex flex-col px-8" id="pin-screen">
+<p class="text-center text-sm font-medium text-gray-600 mb-6">请输入您的 4 位 MOMO PIN 码</p>
+<div class="flex justify-center gap-6 mb-12">
+<div class="pin-dot" id="dot-1"></div>
+<div class="pin-dot" id="dot-2"></div>
+<div class="pin-dot" id="dot-3"></div>
+<div class="pin-dot" id="dot-4"></div>
+</div>
+<!-- Number Pad -->
+<div class="num-pad grid grid-cols-3 gap-4 mt-auto pb-12">
+<button onclick="addPin(1)">1</button>
+<button onclick="addPin(2)">2</button>
+<button onclick="addPin(3)">3</button>
+<button onclick="addPin(4)">4</button>
+<button onclick="addPin(5)">5</button>
+<button onclick="addPin(6)">6</button>
+<button onclick="addPin(7)">7</button>
+<button onclick="addPin(8)">8</button>
+<button onclick="addPin(9)">9</button>
+<button class="flex items-center justify-center text-sm text-gray-400">忘记?</button>
+<button onclick="addPin(0)">0</button>
+<button class="flex items-center justify-center text-gray-400" onclick="removePin()">
+<iconify-icon icon="mdi:backspace-outline"></iconify-icon>
+</button>
+</div>
+</div>
+<!-- Processing Screen (Hidden) -->
+<div class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-8 text-center" id="loading-screen">
+<div class="w-16 h-16 border-4 border-yellow-100 border-t-yellow-400 rounded-full animate-spin mb-6"></div>
+<h3 class="text-lg font-bold text-gray-800">正在处理支付...</h3>
+<p class="text-sm text-gray-400 mt-2">请不要关闭页面或返回，我们正在与 MTN 安全网关通信。</p>
+</div>
+<!-- Success Screen (Hidden) -->
+<div class="hidden absolute inset-0 bg-white z-50 flex flex-col items-center justify-center p-8 text-center" id="success-screen">
+<div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-100 scale-in animate-[bounce_1s_ease-in-out]">
+<iconify-icon class="text-white text-5xl" icon="mdi:check"></iconify-icon>
+</div>
+<h3 class="text-2xl font-black text-gray-800">支付成功！</h3>
+<p class="text-sm text-gray-400 mt-2">您的订单已成功提交并进入处理流程。</p>
+<div class="w-full mt-10 space-y-3">
+<a class="block w-full py-4 bg-[#006B3F] text-white rounded-2xl font-bold" href="order-confirmation.html">查看订单详情</a>
+<a class="block w-full py-4 text-gray-400 font-medium" href="home.html">返回首页</a>
+</div>
+</div>
+</div>
+<script>
+        let pin = "";
+        function addPin(num) {
+            if (pin.length < 4) {
+                pin += num;
+                updateDots();
+                if (pin.length === 4) {
+                    processPayment();
+                }
+            }
+        }
+
+        function removePin() {
+            pin = pin.slice(0, -1);
+            updateDots();
+        }
+
+        function updateDots() {
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i <= pin.length) dot.classList.add('filled');
+                else dot.classList.remove('filled');
+            }
+        }
+
+        function processPayment() {
+            document.getElementById('loading-screen').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('success-screen').classList.remove('hidden');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

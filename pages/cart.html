@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>购物车 - 加纳精品商城</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        body { background-color: #f3f4f6; }
+        .mobile-container { width: 375px; height: 812px; margin: 0 auto; background: #f9fafb; position: relative; overflow-y: auto; overflow-x: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-32">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white px-4 py-4 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2">
+<a href="home.html"><img alt="Li's" class="h-8 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<h1 class="text-xl font-bold text-gray-800">购物车 (3)</h1>
+</div>
+<button class="text-sm font-medium text-[#006B3F]">编辑</button>
+</header>
+<!-- Cart Items -->
+<div class="p-4 space-y-4">
+<!-- Item 1 -->
+<div class="bg-white rounded-2xl p-3 flex gap-3 shadow-sm border border-gray-50">
+<div class="flex items-center">
+<div class="w-5 h-5 rounded-full border-2 border-[#F7B500] bg-[#F7B500] flex items-center justify-center">
+<iconify-icon class="text-white text-xs" icon="mdi:check"></iconify-icon>
+</div>
+</div>
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden">
+<img alt="Cart Product 1" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/4ee05aa73961498b89ce30a0ce3b55ac.jpg">
+</img></div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-sm font-bold text-gray-800 line-clamp-1">Premium Smartphone Pro 14</h3>
+<p class="text-[10px] text-gray-400 mt-1">规格: 深空灰, 256GB</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-lg font-bold text-[#F7B500]">₵4,250</span>
+<div class="flex items-center border border-gray-100 rounded-lg overflow-hidden scale-90">
+<button class="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400"><iconify-icon icon="mdi:minus"></iconify-icon></button>
+<span class="w-8 text-center text-xs font-bold">1</span>
+<button class="w-8 h-8 flex items-center justify-center bg-gray-50 text-[#F7B500]"><iconify-icon icon="mdi:plus"></iconify-icon></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-white rounded-2xl p-3 flex gap-3 shadow-sm border border-gray-50">
+<div class="flex items-center">
+<div class="w-5 h-5 rounded-full border-2 border-[#F7B500] bg-[#F7B500] flex items-center justify-center">
+<iconify-icon class="text-white text-xs" icon="mdi:check"></iconify-icon>
+</div>
+</div>
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden">
+<img alt="Cart Product 2" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/d3bdf0e590984f1fad336ce13ef68526.jpg"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-sm font-bold text-gray-800 line-clamp-1">Wireless Noise Cancelling Headphones</h3>
+<p class="text-[10px] text-gray-400 mt-1">规格: 曜石黑</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-lg font-bold text-[#F7B500]">₵850</span>
+<div class="flex items-center border border-gray-100 rounded-lg overflow-hidden scale-90">
+<button class="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400"><iconify-icon icon="mdi:minus"></iconify-icon></button>
+<span class="w-8 text-center text-xs font-bold">2</span>
+<button class="w-8 h-8 flex items-center justify-center bg-gray-50 text-[#F7B500]"><iconify-icon icon="mdi:plus"></iconify-icon></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-white rounded-2xl p-3 flex gap-3 shadow-sm border border-gray-50 opacity-60">
+<div class="flex items-center">
+<div class="w-5 h-5 rounded-full border-2 border-gray-200"></div>
+</div>
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden">
+<img alt="Cart Product 3" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/682d06d821e04bbf9fc00a3cf1904feb.jpg"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="text-sm font-bold text-gray-800 line-clamp-1">Traditional Kente Pattern Dress</h3>
+<p class="text-[10px] text-red-500 mt-1">库存不足</p>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-lg font-bold text-gray-400">₵320</span>
+<button class="text-xs text-red-500 font-medium">删除</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State (Hidden by default) -->
+<div class="hidden flex flex-col items-center justify-center py-20 px-10 text-center">
+<div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+<iconify-icon class="text-4xl text-gray-300" icon="mdi:cart-off"></iconify-icon>
+</div>
+<h3 class="text-lg font-bold text-gray-800">购物车是空的</h3>
+<p class="text-sm text-gray-400 mt-2">快去挑选加纳最受欢迎的商品吧！</p>
+<a class="mt-6 bg-[#F7B500] text-black px-8 py-3 rounded-xl font-bold" href="home.html">去逛逛</a>
+</div>
+<!-- Footer Checkout -->
+<div class="fixed bottom-16 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-4 py-3 z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-5 h-5 rounded-full border-2 border-[#F7B500] bg-[#F7B500] flex items-center justify-center">
+<iconify-icon class="text-white text-xs" icon="mdi:check"></iconify-icon>
+</div>
+<span class="text-sm font-medium text-gray-600">全选</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="text-xs text-gray-400">合计:</span>
+<span class="text-xl font-black text-[#F7B500]">₵5,950</span>
+</div>
+</div>
+<a class="w-full h-12 bg-[#006B3F] text-white rounded-xl font-bold flex items-center justify-center gap-2" href="checkout.html">
+                去结算 (2)
+                <iconify-icon class="text-xl" icon="mdi:arrow-right"></iconify-icon>
+</a>
+</div>
+<!-- Bottom Tab Navigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between z-50">
+<a class="flex flex-col items-center gap-1 text-gray-400" href="home.html">
+<iconify-icon class="text-2xl" icon="mdi:home-outline"></iconify-icon>
+<span class="text-[10px] font-medium">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="#">
+<iconify-icon class="text-2xl" icon="mdi:view-grid-outline"></iconify-icon>
+<span class="text-[10px] font-medium">分类</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#F7B500]" href="cart.html">
+<iconify-icon class="text-2xl" icon="mdi:cart"></iconify-icon>
+<span class="text-[10px] font-medium">购物车</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-login.html">
+<iconify-icon class="text-2xl" icon="mdi:account-outline"></iconify-icon>
+<span class="text-[10px] font-medium">我的</span>
+</a>
+</nav>
+</div>
+</body>
+</html>

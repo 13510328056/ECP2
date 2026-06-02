@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>分类管理 - GH Elite</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+    body { background-color: #f8fafc; }
+    .mobile-container { width: 375px; margin: 0 auto; background: #f8fafc; position: relative; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; transition: opacity 0.3s ease; }
+    .tree-children { transition: max-height 0.25s ease, opacity 0.25s ease; max-height: 0; opacity: 0; overflow: hidden; }
+    .tree-children.open { max-height: 500px; opacity: 1; }
+    .form-input { width: 100%; height: 44px; background-color: #f9fafb; border-radius: 12px; padding: 0 16px; font-size: 13px; outline: none; border: 1px solid #f1f5f9; transition: border-color 0.2s, background-color 0.2s; }
+    .form-input:focus { border-color: #F7B500; background-color: white; }
+    .form-input.error { border-color: #ef4444; background-color: #fef2f2; }
+    label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; margin-left: 4px; }
+    label.required::after { content: ' *'; color: #ef4444; }
+    .dragging { opacity: 0.5; background: #eef2ff; }
+    .drag-over { border-top: 2px solid #1E3A5F; }
+</style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-24">
+<!-- Toast -->
+<div class="toast hidden px-6 py-3 rounded-xl text-sm font-bold shadow-lg text-white bg-[#1E3A5F]" id="toast"></div>
+<!-- Form Modal -->
+<div class="modal-overlay" id="formModal">
+<div class="bg-white rounded-2xl mx-4 p-6 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between mb-5">
+<h3 class="text-base font-black text-gray-800" id="modalTitle">新增分类</h3>
+<button id="closeFormBtn" type="button"><iconify-icon class="text-2xl text-gray-400" icon="mdi:close"></iconify-icon></button>
+</div>
+<form id="categoryForm" onsubmit="return false;">
+<div class="space-y-4">
+<div>
+<label class="required">分类名称（中文）</label>
+<input class="form-input" id="catNameZh" placeholder="请输入中文名称" type="text"/>
+</div>
+<div>
+<label class="required">分类名称（英文）</label>
+<input class="form-input" id="catNameEn" placeholder="Please enter English name" type="text"/>
+</div>
+<div>
+<label>上级分类</label>
+<select class="form-input" id="catParent">
+<option value="">无（顶级分类）</option>
+<option value="clothing">服装</option>
+<option value="electronics">电子产品</option>
+<option value="food">食品</option>
+<option value="furniture">家居</option>
+<option value="beauty">美妆</option>
+</select>
+</div>
+<div>
+<label>分类图标</label>
+<div class="flex flex-wrap gap-3" id="iconPicker">
+<button class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F7B500] hover:bg-[#fffbeb] selected:border-[#F7B500] selected:bg-[#fffbeb]" data-icon="mdi:tag-text-outline" type="button"><iconify-icon icon="mdi:tag-text-outline"></iconify-icon></button>
+<button class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F7B500] hover:bg-[#fffbeb]" data-icon="mdi:tshirt-crew" type="button"><iconify-icon icon="mdi:tshirt-crew"></iconify-icon></button>
+<button class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F7B500] hover:bg-[#fffbeb]" data-icon="mdi:laptop" type="button"><iconify-icon icon="mdi:laptop"></iconify-icon></button>
+<button class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F7B500] hover:bg-[#fffbeb]" data-icon="mdi:food-apple" type="button"><iconify-icon icon="mdi:food-apple"></iconify-icon></button>
+<button class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F7B500] hover:bg-[#fffbeb]" data-icon="mdi:sofa" type="button"><iconify-icon icon="mdi:sofa"></iconify-icon></button>
+<button class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F7B500] hover:bg-[#fffbeb]" data-icon="mdi:lipstick" type="button"><iconify-icon icon="mdi:lipstick"></iconify-icon></button>
+</div>
+<input id="catIcon" type="hidden" value="mdi:tag-text-outline"/>
+</div>
+<div>
+<label>排序权重</label>
+<input class="form-input" id="catSort" min="0" placeholder="值越大越靠前" type="number" value="0"/>
+</div>
+<div>
+<label>状态</label>
+<div class="flex items-center gap-3 mt-1">
+<span class="text-xs text-gray-500 font-medium">隐藏</span>
+<button class="relative w-12 h-6 rounded-full bg-[#1E3A5F] transition-colors" id="statusToggle" type="button">
+<span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-6" id="statusKnob"></span>
+</button>
+<span class="text-xs text-green-600 font-medium">显示</span>
+<input id="catStatus" type="hidden" value="active"/>
+</div>
+</div>
+</div>
+<div class="flex gap-3 mt-6">
+<button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm font-bold text-gray-600" id="cancelFormBtn" type="button">取消</button>
+<button class="flex-1 h-11 rounded-xl bg-[#1E3A5F] text-sm font-bold text-white shadow-md" id="saveFormBtn" type="button">保存</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+<div class="bg-white rounded-2xl mx-4 p-6 max-w-xs w-full shadow-2xl">
+<div class="text-center">
+<div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+<iconify-icon class="text-3xl text-red-500" icon="mdi:alert-circle-outline"></iconify-icon>
+</div>
+<h3 class="text-base font-black text-gray-800 mb-2">确认删除</h3>
+<p class="text-xs text-gray-500 mb-6" id="deleteConfirmMsg">确定要删除分类「服装」吗？该操作不可撤销。</p>
+<div class="flex gap-3">
+<button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm font-bold text-gray-600" id="cancelDeleteBtn">取消</button>
+<button class="flex-1 h-11 rounded-xl bg-red-500 text-sm font-bold text-white" id="confirmDeleteBtn">确认删除</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Header -->
+<header class="bg-white px-4 py-4 flex items-center justify-between sticky top-0 z-50 border-b border-gray-100">
+<div class="flex items-center gap-2">
+<a href="admin-dashboard.html"><img alt="Li's Industrial Mart" class="h-8 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<h1 class="text-lg font-black text-gray-800">分类管理</h1>
+</div>
+<button class="bg-[#1E3A5F] text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-md" id="addCategoryBtn">
+<iconify-icon icon="mdi:plus"></iconify-icon>
+    新增分类
+</button>
+</header>
+<!-- Stats Cards -->
+<div class="p-4 grid grid-cols-3 gap-3">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center mb-2">
+<iconify-icon class="text-blue-500 text-lg" icon="mdi:shape-outline"></iconify-icon>
+</div>
+<p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">全部分类</p>
+<span class="text-xl font-black text-gray-800" id="totalCategories">12</span>
+</div>
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center mb-2">
+<iconify-icon class="text-green-500 text-lg" icon="mdi:check-circle-outline"></iconify-icon>
+</div>
+<p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">显示中</p>
+<span class="text-xl font-black text-gray-800" id="activeCategories">10</span>
+</div>
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center mb-2">
+<iconify-icon class="text-gray-400 text-lg" icon="mdi:cancel"></iconify-icon>
+</div>
+<p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">已隐藏</p>
+<span class="text-xl font-black text-gray-800" id="hiddenCategories">2</span>
+</div>
+</div>
+<!-- Category Tree List -->
+<div class="px-4 mt-3 space-y-2" id="categoryTree">
+<!-- Will be populated by JS -->
+</div>
+</div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between z-50">
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-dashboard.html">
+<iconify-icon class="text-2xl" icon="mdi:view-dashboard-outline"></iconify-icon>
+<span class="text-[10px] font-medium">看板</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-products.html">
+<iconify-icon class="text-2xl" icon="mdi:package-variant-closed-outline"></iconify-icon>
+<span class="text-[10px] font-medium">商品</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-orders.html">
+<iconify-icon class="text-2xl" icon="mdi:clipboard-list-outline"></iconify-icon>
+<span class="text-[10px] font-medium">订单</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#1E3A5F]" href="admin-categories.html">
+<iconify-icon class="text-2xl" icon="mdi:tag-text-outline"></iconify-icon>
+<span class="text-[10px] font-medium">分类</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="home.html">
+<iconify-icon class="text-2xl" icon="mdi:logout"></iconify-icon>
+<span class="text-[10px] font-medium">退出</span>
+</a>
+</nav>
+<script>
+(function() {
+    // ===== Mock Data =====
+    var treeData = [
+        {
+            id: 'clothing', nameZh: '服装', nameEn: 'Clothing', status: 'active', sort: 10, icon: 'mdi:tshirt-crew', productCount: 8,
+            children: [
+                {
+                    id: 'mens', nameZh: '男装', nameEn: 'Men\'s Wear', status: 'active', sort: 3, icon: 'mdi:tshirt-crew', productCount: 3,
+                    children: [
+                        { id: 'tshirt', nameZh: 'T恤', nameEn: 'T-Shirt', status: 'active', sort: 1, icon: 'mdi:tshirt-crew', productCount: 1, children: [] },
+                        { id: 'pants', nameZh: '裤子', nameEn: 'Pants', status: 'active', sort: 2, icon: 'mdi:tshirt-crew', productCount: 2, children: [] }
+                    ]
+                },
+                { id: 'womens', nameZh: '女装', nameEn: 'Women\'s Wear', status: 'active', sort: 2, icon: 'mdi:tshirt-crew', productCount: 3, children: [] },
+                { id: 'kids', nameZh: '童装', nameEn: 'Kids Wear', status: 'inactive', sort: 1, icon: 'mdi:tshirt-crew', productCount: 2, children: [] }
+            ]
+        },
+        {
+            id: 'electronics', nameZh: '电子产品', nameEn: 'Electronics', status: 'active', sort: 9, icon: 'mdi:laptop', productCount: 4,
+            children: [
+                { id: 'phone', nameZh: '手机', nameEn: 'Mobile Phones', status: 'active', sort: 1, icon: 'mdi:cellphone', productCount: 2, children: [] },
+                { id: 'computer-parts', nameZh: '电脑配件', nameEn: 'Computer Parts', status: 'active', sort: 2, icon: 'mdi:desktop-classic', productCount: 2, children: [] }
+            ]
+        },
+        { id: 'food', nameZh: '食品', nameEn: 'Food', status: 'active', sort: 8, icon: 'mdi:food-apple', productCount: 3, children: [] },
+        { id: 'furniture', nameZh: '家居', nameEn: 'Furniture', status: 'active', sort: 7, icon: 'mdi:sofa', productCount: 2, children: [] },
+        { id: 'beauty', nameZh: '美妆', nameEn: 'Beauty', status: 'active', sort: 6, icon: 'mdi:lipstick', productCount: 1, children: [] }
+    ];
+
+    var container = document.getElementById('categoryTree');
+    var toast = document.getElementById('toast');
+    var deleteModal = document.getElementById('deleteModal');
+    var formModal = document.getElementById('formModal');
+    var deleteTargetId = null;
+    var editingId = null;
+    var selectedIcon = 'mdi:tag-text-outline';
+    var dragItem = null;
+
+    // ===== Toast =====
+    function showToast(msg, type) {
+        toast.className = 'toast px-6 py-3 rounded-xl text-sm font-bold shadow-lg text-white ' + (type === 'error' ? 'bg-red-500' : 'bg-[#1E3A5F]');
+        toast.textContent = msg;
+        toast.classList.remove('hidden');
+        setTimeout(function(){ toast.classList.add('hidden'); }, 2500);
+    }
+
+    // ===== Count Stats =====
+    function updateStats() {
+        var total = 0, active = 0, inactive = 0;
+        function count(nodes) {
+            nodes.forEach(function(n) {
+                total++;
+                if (n.status === 'active') active++; else inactive++;
+                if (n.children && n.children.length) count(n.children);
+            });
+        }
+        count(treeData);
+        document.getElementById('totalCategories').textContent = total;
+        document.getElementById('activeCategories').textContent = active;
+        document.getElementById('hiddenCategories').textContent = inactive;
+    }
+
+    // ===== Render Tree =====
+    function renderTree() {
+        container.innerHTML = '';
+        treeData.sort(function(a, b) { return b.sort - a.sort; });
+        buildTreeNodes(treeData, container, 0);
+        updateStats();
+    }
+
+    function buildTreeNodes(nodes, parentEl, depth) {
+        nodes.forEach(function(node) {
+            var hasChildren = node.children && node.children.length > 0;
+            var card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl shadow-sm border border-gray-50 p-4 mb-2';
+            card.dataset.id = node.id;
+            card.dataset.depth = depth;
+            card.draggable = true;
+
+            var indent = depth * 20;
+            card.style.marginLeft = indent + 'px';
+
+            var mainRow = document.createElement('div');
+            mainRow.className = 'flex items-center justify-between';
+
+            // Left section: expand arrow + name
+            var leftDiv = document.createElement('div');
+            leftDiv.className = 'flex items-center gap-2 flex-1 min-w-0';
+
+            if (hasChildren) {
+                var expandBtn = document.createElement('button');
+                expandBtn.className = 'w-5 h-5 flex items-center justify-center text-gray-400 hover:text-[#1E3A5F] flex-shrink-0 expand-btn';
+                expandBtn.innerHTML = '<iconify-icon icon="mdi:chevron-right" class="text-sm"></iconify-icon>';
+                expandBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleChildren(node.id);
+                });
+                leftDiv.appendChild(expandBtn);
+            } else {
+                var spacer = document.createElement('span');
+                spacer.className = 'w-5 flex-shrink-0';
+                leftDiv.appendChild(spacer);
+            }
+
+            var nameDiv = document.createElement('div');
+            nameDiv.className = 'min-w-0';
+            var nameZh = document.createElement('span');
+            nameZh.className = 'text-sm font-bold text-gray-800';
+            nameZh.textContent = node.nameZh;
+            nameDiv.appendChild(nameZh);
+            var nameEn = document.createElement('span');
+            nameEn.className = 'text-[10px] text-gray-400 ml-2';
+            nameEn.textContent = node.nameEn;
+            nameDiv.appendChild(nameEn);
+            leftDiv.appendChild(nameDiv);
+            mainRow.appendChild(leftDiv);
+
+            // Right section: status badge + product count + actions
+            var rightDiv = document.createElement('div');
+            rightDiv.className = 'flex items-center gap-2 flex-shrink-0';
+
+            // Status badge
+            var statusBadge = document.createElement('span');
+            if (node.status === 'active') {
+                statusBadge.className = 'px-2 py-0.5 bg-green-50 text-green-600 text-[9px] font-bold rounded';
+                statusBadge.textContent = '显示';
+            } else {
+                statusBadge.className = 'px-2 py-0.5 bg-gray-50 text-gray-400 text-[9px] font-bold rounded';
+                statusBadge.textContent = '隐藏';
+            }
+            rightDiv.appendChild(statusBadge);
+
+            // Sort weight
+            var sortSpan = document.createElement('span');
+            sortSpan.className = 'text-[9px] text-gray-300 font-medium';
+            sortSpan.textContent = node.sort;
+            rightDiv.appendChild(sortSpan);
+
+            // Product count badge
+            var countBadge = document.createElement('span');
+            countBadge.className = 'px-2 py-0.5 bg-blue-50 text-[#1E3A5F] text-[9px] font-bold rounded whitespace-nowrap';
+            countBadge.textContent = node.productCount + '件商品';
+            rightDiv.appendChild(countBadge);
+
+            mainRow.appendChild(rightDiv);
+            card.appendChild(mainRow);
+
+            // Actions row
+            var actionsRow = document.createElement('div');
+            actionsRow.className = 'flex items-center justify-end gap-3 mt-3 pt-3 border-t border-gray-50';
+
+            var editBtn = document.createElement('button');
+            editBtn.className = 'text-[10px] font-bold text-blue-600 flex items-center gap-1';
+            editBtn.innerHTML = '<iconify-icon icon="mdi:pencil-outline"></iconify-icon> 编辑';
+            editBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openEditModal(node.id);
+            });
+            actionsRow.appendChild(editBtn);
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.className = 'text-[10px] font-bold text-red-400 flex items-center gap-1';
+            deleteBtn.innerHTML = '<iconify-icon icon="mdi:trash-can-outline"></iconify-icon> 删除';
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openDeleteModal(node.id);
+            });
+            actionsRow.appendChild(deleteBtn);
+
+            card.appendChild(actionsRow);
+            parentEl.appendChild(card);
+
+            // Children container
+            if (hasChildren) {
+                var childContainer = document.createElement('div');
+                childContainer.id = 'children-' + node.id;
+                childContainer.className = 'tree-children';
+                node.children.sort(function(a, b) { return b.sort - a.sort; });
+                buildTreeNodes(node.children, childContainer, depth + 1);
+                parentEl.appendChild(childContainer);
+            }
+
+            // Drag events
+            card.addEventListener('dragstart', function(e) {
+                dragItem = this;
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            card.addEventListener('dragend', function(e) {
+                this.classList.remove('dragging');
+                document.querySelectorAll('.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+                dragItem = null;
+            });
+            card.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (this !== dragItem) this.classList.add('drag-over');
+            });
+            card.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+            card.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                if (dragItem && this !== dragItem) {
+                    var fromId = dragItem.dataset.id;
+                    var toId = this.dataset.id;
+                    showToast('排序已更新', 'success');
+                }
+            });
+        });
+    }
+
+    function toggleChildren(nodeId) {
+        var childContainer = document.getElementById('children-' + nodeId);
+        if (!childContainer) return;
+        childContainer.classList.toggle('open');
+        var expandBtn = childContainer.previousElementSibling.querySelector('.expand-btn iconify-icon');
+        if (expandBtn) {
+            var isOpen = childContainer.classList.contains('open');
+            expandBtn.setAttribute('icon', isOpen ? 'mdi:chevron-down' : 'mdi:chevron-right');
+        }
+    }
+
+    function findNode(id, nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === id) return nodes[i];
+            if (nodes[i].children && nodes[i].children.length) {
+                var found = findNode(id, nodes[i].children);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    // ===== Delete Modal =====
+    function openDeleteModal(id) {
+        var node = findNode(id, treeData);
+        if (!node) return;
+        deleteTargetId = id;
+        document.getElementById('deleteConfirmMsg').textContent = '确定要删除分类「' + node.nameZh + '」吗？该操作不可撤销。';
+        deleteModal.classList.add('open');
+    }
+
+    document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+        deleteModal.classList.remove('open');
+        deleteTargetId = null;
+    });
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (!deleteTargetId) return;
+        // Remove node from tree
+        function removeNode(id, nodes) {
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].id === id) { nodes.splice(i, 1); return true; }
+                if (nodes[i].children && nodes[i].children.length) {
+                    if (removeNode(id, nodes[i].children)) return true;
+                }
+            }
+            return false;
+        }
+        var node = findNode(deleteTargetId, treeData);
+        if (node) {
+            removeNode(deleteTargetId, treeData);
+            renderTree();
+            showToast('分类「' + node.nameZh + '」已删除', 'success');
+        }
+        deleteModal.classList.remove('open');
+        deleteTargetId = null;
+    });
+
+    // ===== Form Modal =====
+    function resetForm() {
+        document.getElementById('catNameZh').value = '';
+        document.getElementById('catNameEn').value = '';
+        document.getElementById('catParent').value = '';
+        document.getElementById('catSort').value = '0';
+        document.getElementById('catIcon').value = 'mdi:tag-text-outline';
+        document.getElementById('statusToggle').className = 'relative w-12 h-6 rounded-full bg-[#1E3A5F] transition-colors';
+        document.getElementById('statusKnob').className = 'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-6';
+        document.getElementById('catStatus').value = 'active';
+        selectedIcon = 'mdi:tag-text-outline';
+        document.querySelectorAll('#iconPicker button').forEach(function(b) {
+            b.classList.remove('border-[#F7B500]', 'bg-[#fffbeb]');
+        });
+        document.querySelector('#iconPicker button[data-icon="mdi:tag-text-outline"]').classList.add('border-[#F7B500]', 'bg-[#fffbeb]');
+        document.getElementById('modalTitle').textContent = '新增分类';
+    }
+
+    function openEditModal(id) {
+        var node = findNode(id, treeData);
+        if (!node) return;
+        editingId = id;
+        document.getElementById('modalTitle').textContent = '编辑分类';
+        document.getElementById('catNameZh').value = node.nameZh;
+        document.getElementById('catNameEn').value = node.nameEn;
+        document.getElementById('catParent').value = '';
+        document.getElementById('catSort').value = node.sort;
+        document.getElementById('catIcon').value = node.icon || 'mdi:tag-text-outline';
+        selectedIcon = node.icon || 'mdi:tag-text-outline';
+        if (node.status === 'active') {
+            document.getElementById('statusToggle').className = 'relative w-12 h-6 rounded-full bg-[#1E3A5F] transition-colors';
+            document.getElementById('statusKnob').className = 'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-6';
+            document.getElementById('catStatus').value = 'active';
+        } else {
+            document.getElementById('statusToggle').className = 'relative w-12 h-6 rounded-full bg-gray-300 transition-colors';
+            document.getElementById('statusKnob').className = 'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform';
+            document.getElementById('catStatus').value = 'inactive';
+        }
+        document.querySelectorAll('#iconPicker button').forEach(function(b) {
+            b.classList.remove('border-[#F7B500]', 'bg-[#fffbeb]');
+            if (b.dataset.icon === selectedIcon) {
+                b.classList.add('border-[#F7B500]', 'bg-[#fffbeb]');
+            }
+        });
+        formModal.classList.add('open');
+    }
+
+    document.getElementById('addCategoryBtn').addEventListener('click', function() {
+        editingId = null;
+        resetForm();
+        formModal.classList.add('open');
+    });
+
+    document.getElementById('closeFormBtn').addEventListener('click', function() { formModal.classList.remove('open'); });
+    document.getElementById('cancelFormBtn').addEventListener('click', function() { formModal.classList.remove('open'); });
+
+    // Icon picker
+    document.querySelectorAll('#iconPicker button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#iconPicker button').forEach(function(b) {
+                b.classList.remove('border-[#F7B500]', 'bg-[#fffbeb]');
+            });
+            this.classList.add('border-[#F7B500]', 'bg-[#fffbeb]');
+            selectedIcon = this.dataset.icon;
+            document.getElementById('catIcon').value = selectedIcon;
+        });
+    });
+
+    // Status toggle
+    document.getElementById('statusToggle').addEventListener('click', function() {
+        var knob = document.getElementById('statusKnob');
+        var hiddenInput = document.getElementById('catStatus');
+        var isActive = hiddenInput.value === 'active';
+        if (isActive) {
+            this.className = 'relative w-12 h-6 rounded-full bg-gray-300 transition-colors';
+            knob.className = 'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform';
+            hiddenInput.value = 'inactive';
+        } else {
+            this.className = 'relative w-12 h-6 rounded-full bg-[#1E3A5F] transition-colors';
+            knob.className = 'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-6';
+            hiddenInput.value = 'active';
+        }
+    });
+
+    // Save form
+    document.getElementById('saveFormBtn').addEventListener('click', function() {
+        var nameZh = document.getElementById('catNameZh').value.trim();
+        var nameEn = document.getElementById('catNameEn').value.trim();
+        if (!nameZh) {
+            document.getElementById('catNameZh').classList.add('error');
+            showToast('请输入分类名称（中文）', 'error');
+            return;
+        }
+        document.getElementById('catNameZh').classList.remove('error');
+        if (!nameEn) {
+            document.getElementById('catNameEn').classList.add('error');
+            showToast('请输入分类名称（英文）', 'error');
+            return;
+        }
+        document.getElementById('catNameEn').classList.remove('error');
+
+        var sortVal = parseInt(document.getElementById('catSort').value) || 0;
+        var statusVal = document.getElementById('catStatus').value;
+
+        if (editingId) {
+            var node = findNode(editingId, treeData);
+            if (node) {
+                node.nameZh = nameZh;
+                node.nameEn = nameEn;
+                node.sort = sortVal;
+                node.status = statusVal;
+                node.icon = selectedIcon;
+                showToast('分类「' + nameZh + '」已更新', 'success');
+            }
+        } else {
+            var newId = 'cat-' + Date.now();
+            var newNode = {
+                id: newId,
+                nameZh: nameZh,
+                nameEn: nameEn,
+                status: statusVal,
+                sort: sortVal,
+                icon: selectedIcon,
+                productCount: 0,
+                children: []
+            };
+            var parentVal = document.getElementById('catParent').value;
+            if (parentVal) {
+                var parentNode = findNode(parentVal, treeData);
+                if (parentNode) {
+                    parentNode.children.push(newNode);
+                } else {
+                    treeData.push(newNode);
+                }
+            } else {
+                treeData.push(newNode);
+            }
+            showToast('分类「' + nameZh + '」已创建', 'success');
+        }
+
+        formModal.classList.remove('open');
+        renderTree();
+    });
+
+    // ===== Init =====
+    renderTree();
+
+    // Click overlay to close modals
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('open');
+                deleteTargetId = null;
+            }
+        });
+    });
+})();
+</script>
+</body>
+</html>

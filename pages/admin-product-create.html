@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>新增商品 - GH Elite</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        body { background-color: #f8fafc; }
+        .mobile-container { width: 375px; margin: 0 auto; background: white; position: relative; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .form-input { width: 100%; height: 44px; background-color: #f9fafb; border-radius: 12px; padding: 0 16px; font-size: 13px; outline: none; border: 1px solid #f1f5f9; transition: border-color 0.2s, background-color 0.2s; }
+        .form-input:focus { border-color: #F7B500; background-color: white; }
+        .form-input.error { border-color: #ef4444; background-color: #fef2f2; }
+        textarea.form-input { height: 100px; padding: 12px 16px; resize: vertical; }
+        label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; margin-left: 4px; }
+        label.required::after { content: ' *'; color: #ef4444; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; transition: opacity 0.3s ease; }
+        .upload-zone { border: 2px dashed #d1d5db; border-radius: 16px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s, background-color 0.2s; }
+        .upload-zone:hover { border-color: #F7B500; background-color: #fffbeb; }
+        .tree-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+        .tree-overlay.open { display: flex; }
+        .tree-panel { background: white; border-radius: 20px 20px 0 0; width: 375px; max-height: 70vh; overflow-y: auto; padding: 20px; animation: slideUp 0.25s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .tree-item { padding: 12px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background 0.15s; }
+        .tree-item:hover { background: #f1f5f9; }
+        .tree-item.active { background: #eef2ff; color: #1E3A5F; font-weight: 700; }
+        .tree-children { padding-left: 20px; }
+        .seo-collapse { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .seo-collapse.open { max-height: 400px; }
+        .error-msg { font-size: 10px; color: #ef4444; margin-top: 4px; margin-left: 4px; display: none; }
+        .error-msg.show { display: block; }
+        .spec-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .spec-row input { flex: 1; }
+        .sortable-dragging { opacity: 0.5; }
+        .pricing-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-32">
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+<!-- Tree Category Selector Overlay -->
+<div class="tree-overlay" id="treeOverlay">
+<div class="tree-panel">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-base font-black text-gray-800">选择分类</h3>
+<button id="closeTreeBtn"><iconify-icon class="text-2xl text-gray-400" icon="mdi:close"></iconify-icon></button>
+</div>
+<div id="treeContainer">
+<div class="tree-item" data-cat="服装">
+<span>服装</span>
+<iconify-icon class="text-gray-300" icon="mdi:chevron-right"></iconify-icon>
+</div>
+<div class="tree-children" style="display:none;">
+<div class="tree-item sub-item" data-cat="服装&gt;男装"><span>男装</span></div>
+<div class="tree-item sub-item" data-cat="服装&gt;女装"><span>女装</span></div>
+<div class="tree-item sub-item" data-cat="服装&gt;童装"><span>童装</span></div>
+</div>
+<div class="tree-item" data-cat="电子产品">
+<span>电子产品</span>
+<iconify-icon class="text-gray-300" icon="mdi:chevron-right"></iconify-icon>
+</div>
+<div class="tree-children" style="display:none;">
+<div class="tree-item sub-item" data-cat="电子产品&gt;手机"><span>手机</span></div>
+<div class="tree-item sub-item" data-cat="电子产品&gt;电脑"><span>电脑</span></div>
+<div class="tree-item sub-item" data-cat="电子产品&gt;配件"><span>配件</span></div>
+</div>
+<div class="tree-item" data-cat="食品">
+<span>食品</span>
+<iconify-icon class="text-gray-300" icon="mdi:chevron-right"></iconify-icon>
+</div>
+<div class="tree-children" style="display:none;">
+<div class="tree-item sub-item" data-cat="食品&gt;零食"><span>零食</span></div>
+<div class="tree-item sub-item" data-cat="食品&gt;饮料"><span>饮料</span></div>
+<div class="tree-item sub-item" data-cat="食品&gt;粮油"><span>粮油</span></div>
+</div>
+<div class="tree-item" data-cat="家居">
+<span>家居</span>
+<iconify-icon class="text-gray-300" icon="mdi:chevron-right"></iconify-icon>
+</div>
+<div class="tree-children" style="display:none;">
+<div class="tree-item sub-item" data-cat="家居&gt;家具"><span>家具</span></div>
+<div class="tree-item sub-item" data-cat="家居&gt;厨具"><span>厨具</span></div>
+<div class="tree-item sub-item" data-cat="家居&gt;家纺"><span>家纺</span></div>
+</div>
+<div class="tree-item" data-cat="美妆">
+<span>美妆</span>
+<iconify-icon class="text-gray-300" icon="mdi:chevron-right"></iconify-icon>
+</div>
+<div class="tree-children" style="display:none;">
+<div class="tree-item sub-item" data-cat="美妆&gt;护肤"><span>护肤</span></div>
+<div class="tree-item sub-item" data-cat="美妆&gt;彩妆"><span>彩妆</span></div>
+<div class="tree-item sub-item" data-cat="美妆&gt;个人护理"><span>个人护理</span></div>
+</div>
+</div>
+<div class="mt-4">
+<button class="w-full h-11 bg-[#1E3A5F] text-white rounded-xl font-bold text-sm" id="confirmTreeBtn">确认选择</button>
+</div>
+</div>
+</div>
+<!-- Header -->
+<header class="bg-white px-4 py-4 flex items-center justify-between sticky top-0 z-50 border-b border-gray-100">
+<div class="flex items-center gap-3">
+<button onclick="history.back()"><iconify-icon class="text-2xl text-gray-800" icon="mdi:arrow-left"></iconify-icon></button>
+<a href="admin-dashboard.html"><img alt="Li's" class="h-8 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<h1 class="text-lg font-black text-gray-800">新增商品</h1>
+</div>
+<button class="text-xs font-bold text-gray-400" id="draftHeaderBtn">保存草稿</button>
+</header>
+<form class="p-5 space-y-6" id="productForm" novalidate="">
+<!-- === 2.1 基础信息区 === -->
+<div class="space-y-4">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2">
+<iconify-icon icon="mdi:information-outline"></iconify-icon> 基础信息
+        </h2>
+<!-- 商品名称（中文） -->
+<div>
+<label class="required">商品名称 (中文)</label>
+<input class="form-input" id="nameCn" placeholder="例如: 旗舰智能手机 Pro 14" required="" type="text"/>
+<div class="error-msg" id="nameCnError">请输入商品中文名称</div>
+</div>
+<!-- 商品名称（英文） -->
+<div>
+<label class="required">商品名称 (英文)</label>
+<input class="form-input" id="nameEn" placeholder="e.g. Smartphone Pro 14" required="" type="text"/>
+<div class="error-msg" id="nameEnError">请输入商品英文名称</div>
+</div>
+<!-- SKU + 自动生成 -->
+<div>
+<label class="required">SKU 编码</label>
+<div class="flex gap-2">
+<input class="form-input flex-1" id="sku" placeholder="GH-PH-001" required="" type="text"/>
+<button class="h-11 px-4 bg-gray-100 text-gray-600 rounded-xl text-[10px] font-bold whitespace-nowrap hover:bg-gray-200 transition-colors" id="autoSkuBtn" type="button">自动生成</button>
+</div>
+<div class="error-msg" id="skuError">请输入SKU编码</div>
+</div>
+<!-- 商品分类 - 树形选择 -->
+<div>
+<label class="required">商品分类</label>
+<div class="relative">
+<input class="form-input cursor-pointer" id="categoryDisplay" placeholder="点击选择分类" readonly="" type="text"/>
+<iconify-icon class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" icon="mdi:chevron-down"></iconify-icon>
+</div>
+<input id="categoryValue" type="hidden"/>
+<div class="error-msg" id="categoryError">请选择商品分类</div>
+</div>
+<!-- 品牌 -->
+<div>
+<label>品牌</label>
+<select class="form-input" id="brand">
+<option value="">请选择品牌</option>
+<option value="Li's">Li's</option>
+<option value="Nike">Nike</option>
+<option value="Adidas">Adidas</option>
+<option value="三星">三星</option>
+<option value="华为">华为</option>
+<option value="本地品牌">本地品牌</option>
+</select>
+</div>
+</div>
+<!-- === 2.2 价格与库存区 === -->
+<div class="pt-4 border-t border-gray-100 space-y-4">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2">
+<iconify-icon icon="mdi:currency-usd"></iconify-icon> 价格与库存
+        </h2>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="required">价格 (₵)</label>
+<input class="form-input" id="price" placeholder="0.00" required="" step="0.01" type="number"/>
+<div class="error-msg" id="priceError">请输入销售价格</div>
+</div>
+<div>
+<label>原价 (₵)</label>
+<input class="form-input" id="oldPrice" placeholder="0.00" step="0.01" type="number"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="required">库存数量</label>
+<input class="form-input" id="stock" min="0" placeholder="0" required="" type="number"/>
+<div class="error-msg" id="stockError">请输入库存数量</div>
+</div>
+<div>
+<label>库存预警值</label>
+<input class="form-input" id="stockAlert" min="0" placeholder="10" type="number"/>
+</div>
+</div>
+<div>
+<label>商品重量 (kg)</label>
+<input class="form-input" id="weight" min="0" placeholder="0.00" step="0.01" type="number"/>
+</div>
+</div>
+<!-- === 2.3 图片上传区 === -->
+<div class="pt-4 border-t border-gray-100">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2 mb-3">
+<iconify-icon icon="mdi:image-multiple-outline"></iconify-icon> 商品图片
+            <span class="text-[10px] font-normal text-gray-400">(最多9张)</span>
+</h2>
+<div class="grid grid-cols-3 gap-3" id="imageGrid">
+<div class="upload-zone" id="uploadZone">
+<iconify-icon class="text-3xl text-gray-300" icon="mdi:camera-plus"></iconify-icon>
+<span class="text-[9px] text-gray-400 mt-1">点击上传</span>
+</div>
+</div>
+<input accept="image/*" class="hidden" id="fileInput" multiple="" type="file"/>
+</div>
+<!-- === 2.4 商品详情（富文本编辑器） === -->
+<div class="pt-4 border-t border-gray-100">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2 mb-3">
+<iconify-icon icon="mdi:file-document-edit-outline"></iconify-icon> 商品详情
+        </h2>
+<div class="bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
+<div class="flex items-center gap-1 px-3 py-2 border-b border-gray-100 bg-white" id="editorToolbar">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 font-bold" data-cmd="bold" title="加粗" type="button">B</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 italic" data-cmd="italic" title="斜体" type="button">I</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 underline" data-cmd="underline" title="下划线" type="button">U</button>
+<span class="w-px h-5 bg-gray-200 mx-1"></span>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600" data-cmd="insertUnorderedList" title="列表" type="button">
+<iconify-icon icon="mdi:format-list-bulleted"></iconify-icon>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600" data-cmd="insertImage" title="插入图片" type="button">
+<iconify-icon icon="mdi:image-plus"></iconify-icon>
+</button>
+</div>
+<textarea class="w-full bg-white text-sm p-4 outline-none border-none min-h-[200px]" id="detailEditor" placeholder="输入商品详细介绍，支持图文混排..."></textarea>
+</div>
+</div>
+<!-- === 2.5 规格参数（键值对列表） === -->
+<div class="pt-4 border-t border-gray-100">
+<div class="flex items-center justify-between mb-3">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2">
+<iconify-icon icon="mdi:list-box-outline"></iconify-icon> 规格参数
+            </h2>
+<button class="text-[11px] font-bold text-[#1E3A5F] flex items-center gap-1 hover:underline" id="addSpecBtn" type="button">
+<iconify-icon icon="mdi:plus-circle-outline"></iconify-icon> 添加规格
+            </button>
+</div>
+<div id="specContainer">
+<div class="spec-row">
+<input class="form-input spec-name" placeholder="规格名称，如：材质" type="text" value="材质"/>
+<input class="form-input spec-value" placeholder="规格值，如：纯棉" type="text" value="纯棉"/>
+<button class="w-9 h-9 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 remove-spec" type="button">
+<iconify-icon icon="mdi:minus-circle-outline"></iconify-icon>
+</button>
+</div>
+<div class="spec-row">
+<input class="form-input spec-name" placeholder="规格名称，如：颜色" type="text" value="颜色"/>
+<input class="form-input spec-value" placeholder="规格值，如：黑色" type="text" value="黑色"/>
+<button class="w-9 h-9 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 remove-spec" type="button">
+<iconify-icon icon="mdi:minus-circle-outline"></iconify-icon>
+</button>
+</div>
+</div>
+</div>
+<!-- === 2.6 批量定价（阶梯表格） === -->
+<div class="pt-4 border-t border-gray-100">
+<div class="flex items-center justify-between mb-1">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2">
+<iconify-icon icon="mdi:tag-multiple-outline"></iconify-icon> 批量定价
+            </h2>
+<button class="text-[11px] font-bold text-[#1E3A5F] flex items-center gap-1 hover:underline" id="addTierBtn" type="button">
+<iconify-icon icon="mdi:plus-circle-outline"></iconify-icon> 添加阶梯
+            </button>
+</div>
+<p class="text-[10px] text-gray-400 mb-3 ml-1">Buy More, Save More</p>
+<div class="bg-gray-50 rounded-2xl p-3" id="tierContainer">
+<div class="grid grid-cols-3 gap-2 text-[9px] font-bold text-gray-400 uppercase text-center mb-2">
+<div>数量区间</div>
+<div>折扣价 (₵)</div>
+<div>折扣率</div>
+</div>
+<div class="pricing-row">
+<input class="form-input h-9 text-center px-1 text-xs" placeholder="10+" type="text" value="10+"/>
+<input class="form-input h-9 text-center px-1 text-xs tier-price" placeholder="108.00" step="0.01" type="number" value="108.00"/>
+<div class="flex items-center gap-1">
+<input class="form-input h-9 text-center px-1 text-xs tier-discount" placeholder="10" type="number" value="10"/>
+<span class="text-[10px] text-gray-400 whitespace-nowrap">% off</span>
+<button class="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 remove-tier" type="button">
+<iconify-icon class="text-sm" icon="mdi:minus-circle-outline"></iconify-icon>
+</button>
+</div>
+</div>
+<div class="pricing-row">
+<input class="form-input h-9 text-center px-1 text-xs" placeholder="20+" type="text" value="20+"/>
+<input class="form-input h-9 text-center px-1 text-xs tier-price" placeholder="96.00" step="0.01" type="number" value="96.00"/>
+<div class="flex items-center gap-1">
+<input class="form-input h-9 text-center px-1 text-xs tier-discount" placeholder="20" type="number" value="20"/>
+<span class="text-[10px] text-gray-400 whitespace-nowrap">% off</span>
+<button class="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 remove-tier" type="button">
+<iconify-icon class="text-sm" icon="mdi:minus-circle-outline"></iconify-icon>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- === 2.7 SEO信息（折叠面板） === -->
+<div class="pt-4 border-t border-gray-100">
+<button class="w-full flex items-center justify-between" id="seoToggleBtn" type="button">
+<h2 class="text-sm font-black text-[#1E3A5F] flex items-center gap-2">
+<iconify-icon icon="mdi:search-web"></iconify-icon> SEO 信息
+            </h2>
+<iconify-icon class="text-gray-400 text-xl transition-transform" icon="mdi:chevron-down" id="seoIcon"></iconify-icon>
+</button>
+<div class="seo-collapse mt-3" id="seoPanel">
+<div class="space-y-4">
+<div>
+<label>SEO Title</label>
+<input class="form-input" id="seoTitle" placeholder="搜索引擎显示的标题" type="text"/>
+</div>
+<div>
+<label>SEO Description</label>
+<textarea class="form-input" id="seoDesc" placeholder="搜索引擎显示的描述..." rows="3"></textarea>
+</div>
+</div>
+</div>
+</div>
+</form>
+<!-- === 2.8 底部固定操作按钮 === -->
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-4 py-4 flex gap-3 z-50 shadow-lg">
+<button class="flex-1 h-12 border-2 border-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors" id="saveDraftBtn">保存草稿</button>
+<button class="flex-1 h-12 bg-[#16a34a] text-white rounded-xl font-bold text-sm shadow-lg shadow-green-100 hover:bg-[#15803d] transition-colors" id="publishBtn">保存并上架</button>
+</div>
+</div>
+<script>
+(function() {
+    var toast = document.getElementById('toast');
+    function showToast(msg, type) {
+        toast.className = 'toast px-6 py-3 rounded-xl text-sm font-bold shadow-lg text-white ' + (type === 'error' ? 'bg-red-500' : 'bg-[#1E3A5F]');
+        toast.textContent = msg;
+        toast.classList.remove('hidden');
+        setTimeout(function(){ toast.classList.add('hidden'); }, 2500);
+    }
+
+    // === SKU 自动生成 ===
+    document.getElementById('autoSkuBtn').addEventListener('click', function() {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var code = 'SKU-2026-';
+        for (var i = 0; i < 5; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('sku').value = code;
+        document.getElementById('sku').classList.remove('error');
+        document.getElementById('skuError').classList.remove('show');
+        showToast('SKU 已自动生成: ' + code, 'success');
+    });
+
+    // === 树形分类选择 ===
+    var treeOverlay = document.getElementById('treeOverlay');
+    var categoryDisplay = document.getElementById('categoryDisplay');
+    var categoryValue = document.getElementById('categoryValue');
+    var selectedCat = '';
+
+    categoryDisplay.addEventListener('click', function() { treeOverlay.classList.add('open'); });
+    document.getElementById('closeTreeBtn').addEventListener('click', function() { treeOverlay.classList.remove('open'); });
+
+    // Toggle subcategories
+    document.querySelectorAll('#treeContainer > .tree-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            var children = this.nextElementSibling;
+            if (children && children.classList.contains('tree-children')) {
+                var isVisible = children.style.display !== 'none';
+                children.style.display = isVisible ? 'none' : 'block';
+                var icon = this.querySelector('iconify-icon');
+                if (icon) icon.setAttribute('icon', isVisible ? 'mdi:chevron-right' : 'mdi:chevron-down');
+                // Deselect other main items
+                document.querySelectorAll('#treeContainer > .tree-item').forEach(function(i) { i.classList.remove('active'); });
+                this.classList.add('active');
+                // If hiding, clear selection
+                if (isVisible && selectedCat === this.dataset.cat) {
+                    selectedCat = '';
+                } else if (!isVisible) {
+                    selectedCat = this.dataset.cat;
+                }
+            } else {
+                document.querySelectorAll('.tree-item').forEach(function(i) { i.classList.remove('active'); });
+                this.classList.add('active');
+                selectedCat = this.dataset.cat;
+            }
+        });
+    });
+
+    // Sub-items click
+    document.querySelectorAll('.sub-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.querySelectorAll('.tree-item').forEach(function(i) { i.classList.remove('active'); });
+            this.classList.add('active');
+            selectedCat = this.dataset.cat;
+        });
+    });
+
+    document.getElementById('confirmTreeBtn').addEventListener('click', function() {
+        if (selectedCat) {
+            categoryDisplay.value = selectedCat.replace(/>/g, ' > ');
+            categoryValue.value = selectedCat;
+            categoryDisplay.classList.remove('error');
+            document.getElementById('categoryError').classList.remove('show');
+        }
+        treeOverlay.classList.remove('open');
+    });
+
+    // === 图片上传 ===
+    var uploadZone = document.getElementById('uploadZone');
+    var fileInput = document.getElementById('fileInput');
+    var imageGrid = document.getElementById('imageGrid');
+    var uploadedCount = 0;
+
+    uploadZone.addEventListener('click', function() { fileInput.click(); });
+    fileInput.addEventListener('change', function(e) {
+        var files = Array.from(e.target.files);
+        var remaining = 9 - uploadedCount;
+        if (files.length > remaining) {
+            showToast('最多上传 ' + 9 + ' 张图片', 'error');
+            files = files.slice(0, remaining);
+        }
+        files.forEach(function(file) {
+            if (uploadedCount >= 9) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var div = document.createElement('div');
+                div.className = 'aspect-square bg-gray-100 rounded-2xl relative overflow-hidden group uploaded-img';
+                div.setAttribute('draggable', 'true');
+                div.innerHTML = '<img class="w-full h-full object-cover" alt="Uploaded product image" src="' + ev.target.result + '"/>' +
+                    '<button class="remove-img absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70" type="button">' +
+                    '<iconify-icon class="text-xs" icon="mdi:close"></iconify-icon></button>';
+                imageGrid.insertBefore(div, uploadZone);
+                uploadedCount++;
+                // Add drag events
+                div.addEventListener('dragstart', function(ev2) { ev2.dataTransfer.setData('text/plain', 'img'); this.classList.add('sortable-dragging'); });
+                div.addEventListener('dragend', function() { this.classList.remove('sortable-dragging'); });
+                div.addEventListener('dragover', function(ev2) { ev2.preventDefault(); });
+                div.addEventListener('drop', function(ev2) {
+                    ev2.preventDefault();
+                    var dragged = document.querySelector('.sortable-dragging');
+                    if (dragged && dragged !== this) {
+                        var parent = dragged.parentNode;
+                        var siblings = Array.from(parent.children);
+                        var fromIdx = siblings.indexOf(dragged);
+                        var toIdx = siblings.indexOf(this);
+                        if (fromIdx < toIdx) parent.insertBefore(dragged, this.nextSibling);
+                        else parent.insertBefore(dragged, this);
+                    }
+                });
+                // Remove button
+                div.querySelector('.remove-img').addEventListener('click', function() {
+                    div.remove();
+                    uploadedCount--;
+                    if (uploadedCount < 9) uploadZone.style.display = 'flex';
+                });
+                // Remove upload zone if full
+                if (uploadedCount >= 9) uploadZone.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+        this.value = '';
+    });
+
+    // Drag & drop for upload zone
+    uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#F7B500'; this.style.backgroundColor = '#fffbeb'; });
+    uploadZone.addEventListener('dragleave', function() { this.style.borderColor = '#d1d5db'; this.style.backgroundColor = ''; });
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#d1d5db';
+        this.style.backgroundColor = '';
+        var files = Array.from(e.dataTransfer.files).filter(function(f) { return f.type.startsWith('image/'); });
+        var remaining = 9 - uploadedCount;
+        if (files.length > remaining) { showToast('最多上传9张图片', 'error'); files = files.slice(0, remaining); }
+        files.forEach(function(file) {
+            if (uploadedCount >= 9) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var div = document.createElement('div');
+                div.className = 'aspect-square bg-gray-100 rounded-2xl relative overflow-hidden group uploaded-img';
+                div.innerHTML = '<img class="w-full h-full object-cover" alt="Uploaded product image" src="' + ev.target.result + '"/>' +
+                    '<button class="remove-img absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70" type="button">' +
+                    '<iconify-icon class="text-xs" icon="mdi:close"></iconify-icon></button>';
+                imageGrid.insertBefore(div, uploadZone);
+                uploadedCount++;
+                div.querySelector('.remove-img').addEventListener('click', function() { div.remove(); uploadedCount--; if (uploadedCount < 9) uploadZone.style.display = 'flex'; });
+                if (uploadedCount >= 9) uploadZone.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // === 富文本编辑器工具栏 ===
+    var editor = document.getElementById('detailEditor');
+    document.querySelectorAll('#editorToolbar button[data-cmd]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var cmd = this.dataset.cmd;
+            if (cmd === 'insertImage') {
+                var url = prompt('请输入图片URL:');
+                if (url) {
+                    var start = editor.selectionStart;
+                    var end = editor.selectionEnd;
+                    var text = editor.value;
+                    editor.value = text.substring(0, start) + '[图片: ' + url + ']' + text.substring(end);
+                }
+            } else {
+                var start = editor.selectionStart;
+                var end = editor.selectionEnd;
+                var selected = editor.value.substring(start, end);
+                var wrapped = '';
+                if (cmd === 'bold') wrapped = '**' + selected + '**';
+                else if (cmd === 'italic') wrapped = '*' + selected + '*';
+                else if (cmd === 'underline') wrapped = '<u>' + selected + '</u>';
+                else if (cmd === 'insertUnorderedList') wrapped = '\n- ' + selected;
+                editor.value = editor.value.substring(0, start) + wrapped + editor.value.substring(end);
+            }
+            editor.focus();
+        });
+    });
+
+    // === 规格参数 ===
+    document.getElementById('addSpecBtn').addEventListener('click', function() {
+        var container = document.getElementById('specContainer');
+        var row = document.createElement('div');
+        row.className = 'spec-row';
+        row.innerHTML = '<input class="form-input spec-name" placeholder="规格名称，如：材质" type="text"/>' +
+            '<input class="form-input spec-value" placeholder="规格值，如：纯棉" type="text"/>' +
+            '<button class="w-9 h-9 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 remove-spec" type="button">' +
+            '<iconify-icon icon="mdi:minus-circle-outline"></iconify-icon></button>';
+        container.appendChild(row);
+        row.querySelector('.remove-spec').addEventListener('click', function() { row.remove(); });
+    });
+
+    document.querySelectorAll('.remove-spec').forEach(function(btn) {
+        btn.addEventListener('click', function() { this.closest('.spec-row').remove(); });
+    });
+
+    // === 批量定价 ===
+    document.getElementById('addTierBtn').addEventListener('click', function() {
+        var container = document.getElementById('tierContainer');
+        var row = document.createElement('div');
+        row.className = 'pricing-row';
+        row.innerHTML = '<input class="form-input h-9 text-center px-1 text-xs" placeholder="数量" type="text"/>' +
+            '<input class="form-input h-9 text-center px-1 text-xs tier-price" placeholder="折扣价" step="0.01" type="number"/>' +
+            '<div class="flex items-center gap-1">' +
+            '<input class="form-input h-9 text-center px-1 text-xs tier-discount" placeholder="折扣率" type="number"/>' +
+            '<span class="text-[10px] text-gray-400 whitespace-nowrap">% off</span>' +
+            '<button class="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg flex-shrink-0 remove-tier" type="button">' +
+            '<iconify-icon class="text-sm" icon="mdi:minus-circle-outline"></iconify-icon></button></div>';
+        container.appendChild(row);
+        row.querySelector('.remove-tier').addEventListener('click', function() { row.remove(); });
+    });
+
+    document.querySelectorAll('.remove-tier').forEach(function(btn) {
+        btn.addEventListener('click', function() { this.closest('.pricing-row').remove(); });
+    });
+
+    // === SEO 折叠面板 ===
+    var seoPanel = document.getElementById('seoPanel');
+    var seoIcon = document.getElementById('seoIcon');
+    document.getElementById('seoToggleBtn').addEventListener('click', function() {
+        seoPanel.classList.toggle('open');
+        seoIcon.style.transform = seoPanel.classList.contains('open') ? 'rotate(180deg)' : '';
+    });
+
+    // === 表单验证 ===
+    var requiredFields = {
+        'nameCn': 'nameCnError',
+        'nameEn': 'nameEnError',
+        'sku': 'skuError',
+        'price': 'priceError',
+        'stock': 'stockError'
+    };
+
+    function validateForm() {
+        var valid = true;
+        Object.keys(requiredFields).forEach(function(id) {
+            var input = document.getElementById(id);
+            var error = document.getElementById(requiredFields[id]);
+            if (!input.value.trim()) {
+                input.classList.add('error');
+                error.classList.add('show');
+                valid = false;
+            } else {
+                input.classList.remove('error');
+                error.classList.remove('show');
+            }
+        });
+        // Category
+        if (!categoryValue.value) {
+            categoryDisplay.classList.add('error');
+            document.getElementById('categoryError').classList.add('show');
+            valid = false;
+        } else {
+            categoryDisplay.classList.remove('error');
+            document.getElementById('categoryError').classList.remove('show');
+        }
+        return valid;
+    }
+
+    // Clear errors on input
+    document.querySelectorAll('.form-input').forEach(function(input) {
+        input.addEventListener('input', function() {
+            this.classList.remove('error');
+            var id = this.id;
+            if (requiredFields[id]) {
+                document.getElementById(requiredFields[id]).classList.remove('show');
+            }
+        });
+    });
+
+    // === Publish ===
+    document.getElementById('publishBtn').addEventListener('click', function() {
+        if (validateForm()) {
+            showToast('商品已成功上架！', 'success');
+            this.style.transform = 'scale(0.97)';
+            setTimeout(function() { this.style.transform = ''; }.bind(this), 150);
+        } else {
+            showToast('请检查表单中的必填字段', 'error');
+        }
+    });
+
+    // === Save Draft ===
+    function saveDraft() {
+        showToast('草稿已保存', 'success');
+    }
+    document.getElementById('saveDraftBtn').addEventListener('click', saveDraft);
+    document.getElementById('draftHeaderBtn').addEventListener('click', saveDraft);
+
+    // === Clear category error on selection ===
+    categoryDisplay.addEventListener('click', function() {
+        this.classList.remove('error');
+        document.getElementById('categoryError').classList.remove('show');
+    });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>管理看板 - GH Elite</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/echarts.min.js"></script>
+<style>
+        body { background-color: #f8fafc; }
+        .mobile-container { width: 375px; height: 812px; margin: 0 auto; background: #f8fafc; position: relative; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-24">
+<!-- Header -->
+<header class="bg-white px-4 py-4 flex items-center justify-between sticky top-0 z-50 border-b border-gray-100">
+<div class="flex items-center gap-3">
+<a href="admin-dashboard.html"><img alt="Li's Industrial Mart" class="h-10 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<div>
+<h1 class="text-sm font-black text-gray-800">管理中心</h1>
+<p class="text-[10px] text-gray-400">欢迎回来, 管理员</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center relative">
+<iconify-icon class="text-xl text-gray-600" icon="mdi:bell-outline"></iconify-icon>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<img alt="Admin Avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/371f79d32617493b8ac14081dbc96097.jpg">
+</img></div>
+</header>
+<!-- Stats Cards -->
+<div class="p-4 grid grid-cols-2 gap-4">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center mb-3">
+<iconify-icon class="text-blue-500 text-lg" icon="mdi:cart-check"></iconify-icon>
+</div>
+<p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">今日订单</p>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-xl font-black text-gray-800">128</span>
+<span class="text-[10px] text-green-500 font-bold">+12%</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center mb-3">
+<iconify-icon class="text-orange-500 text-lg" icon="mdi:cash-multiple"></iconify-icon>
+</div>
+<p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">今日销售额</p>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-lg font-black text-gray-800">₵42.5k</span>
+<span class="text-[10px] text-green-500 font-bold">+8%</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center mb-3">
+<iconify-icon class="text-red-500 text-lg" icon="mdi:clock-alert"></iconify-icon>
+</div>
+<p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">待处理订单</p>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-xl font-black text-gray-800">24</span>
+<span class="text-[10px] text-gray-300 font-normal">需发货</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center mb-3">
+<iconify-icon class="text-purple-500 text-lg" icon="mdi:package-variant"></iconify-icon>
+</div>
+<p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">库存预警</p>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-xl font-black text-gray-800">15</span>
+<span class="text-[10px] text-red-500 font-bold">急需补货</span>
+</div>
+</div>
+</div>
+<!-- Sales Chart -->
+<div class="px-4 mb-4">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-50">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-gray-800">销售趋势 (最近7天)</h3>
+<iconify-icon class="text-gray-400" icon="mdi:dots-horizontal"></iconify-icon>
+</div>
+<div class="w-full h-48" id="salesChart"></div>
+</div>
+</div>
+<!-- Recent Orders -->
+<div class="px-4 mb-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-gray-800">最近订单</h3>
+<a class="text-xs text-[#006B3F] font-bold" href="admin-orders.html">全部订单</a>
+</div>
+<div class="space-y-3">
+<div class="bg-white p-3 rounded-xl border border-gray-50 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+<iconify-icon class="text-gray-400" icon="mdi:account"></iconify-icon>
+</div>
+<div>
+<p class="text-xs font-bold text-gray-800">Kwame Mensah</p>
+<p class="text-[10px] text-gray-400">#GH88293401 • ₵5,975</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-green-100 text-green-600 text-[9px] font-bold rounded">已支付</span>
+</div>
+<div class="bg-white p-3 rounded-xl border border-gray-50 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+<iconify-icon class="text-gray-400" icon="mdi:account"></iconify-icon>
+</div>
+<div>
+<p class="text-xs font-bold text-gray-800">Abena Appiah</p>
+<p class="text-[10px] text-gray-400">#GH88293402 • ₵1,250</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-yellow-100 text-yellow-600 text-[9px] font-bold rounded">待发货</span>
+</div>
+<div class="bg-white p-3 rounded-xl border border-gray-50 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+<iconify-icon class="text-gray-400" icon="mdi:account"></iconify-icon>
+</div>
+<div>
+<p class="text-xs font-bold text-gray-800">Kofi Boateng</p>
+<p class="text-[10px] text-gray-400">#GH88293403 • ₵850</p>
+</div>
+</div>
+<span class="px-2 py-1 bg-blue-100 text-blue-600 text-[9px] font-bold rounded">待付款</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between z-50">
+<a class="flex flex-col items-center gap-1 text-[#006B3F]" href="admin-dashboard.html">
+<iconify-icon class="text-2xl" icon="mdi:view-dashboard"></iconify-icon>
+<span class="text-[10px] font-medium">看板</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-products.html">
+<iconify-icon class="text-2xl" icon="mdi:package-variant-closed"></iconify-icon>
+<span class="text-[10px] font-medium">商品</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-orders.html">
+<iconify-icon class="text-2xl" icon="mdi:clipboard-list-outline"></iconify-icon>
+<span class="text-[10px] font-medium">订单</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-categories.html">
+<iconify-icon class="text-2xl" icon="mdi:tag-text-outline"></iconify-icon>
+<span class="text-[10px] font-medium">分类</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="home.html">
+<iconify-icon class="text-2xl" icon="mdi:logout"></iconify-icon>
+<span class="text-[10px] font-medium">退出</span>
+</a>
+</nav>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var chartDom = document.getElementById('salesChart');
+            var myChart = echarts.init(chartDom);
+            var option = {
+                grid: { top: 10, right: 10, bottom: 20, left: 35 },
+                xAxis: {
+                    type: 'category',
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    axisLabel: { fontSize: 9, color: '#94a3b8' },
+                    axisLine: { show: false },
+                    axisTick: { show: false }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: { fontSize: 9, color: '#94a3b8' },
+                    splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } }
+                },
+                series: [{
+                    data: [12000, 18000, 15000, 25000, 22000, 32000, 42500],
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'none',
+                    lineStyle: { width: 3, color: '#F7B500' },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(247, 181, 0, 0.2)' },
+                            { offset: 1, color: 'rgba(247, 181, 0, 0)' }
+                        ])
+                    }
+                }]
+            };
+            myChart.setOption(option);
+        });
+    </script>
+</body>
+</html>

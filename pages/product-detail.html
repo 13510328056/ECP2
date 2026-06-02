@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>商品详情 - 加纳精品商城</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        body { background-color: #f3f4f6; }
+        .mobile-container { width: 375px; height: 812px; margin: 0 auto; background: white; position: relative; overflow-y: auto; overflow-x: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .tab-active { border-bottom: 2px solid #F7B500; color: #F7B500; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-24">
+<!-- Top Nav -->
+<div class="sticky top-0 z-50 bg-white/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100" onclick="history.back()">
+<iconify-icon class="text-2xl text-gray-800" icon="mdi:chevron-left"></iconify-icon>
+</button>
+<a href="home.html"><img alt="Li's" class="h-8 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<span class="font-bold text-gray-800">商品详情</span>
+<div class="flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100">
+<iconify-icon class="text-xl text-gray-800" icon="mdi:share-variant"></iconify-icon>
+</button>
+</div>
+</div>
+<!-- Image Gallery -->
+<div class="relative w-full aspect-square bg-gray-100">
+<img alt="Product Main Image" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/bab97efea94e4dd68c49ee84bbe1e437.jpg">
+<div class="absolute bottom-4 right-4 bg-black/40 text-white text-[10px] px-2 py-1 rounded-full">1/4</div>
+</img></div>
+<!-- Product Info -->
+<div class="p-4">
+<div class="flex items-center justify-between">
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-bold text-[#F7B500]">₵4,250</span>
+<span class="text-gray-400 line-through text-sm">₵5,000</span>
+<span class="bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold">15% OFF</span>
+</div>
+<div class="flex items-center gap-1 text-yellow-400">
+<iconify-icon icon="mdi:star"></iconify-icon>
+<span class="text-gray-800 text-sm font-bold">4.8</span>
+</div>
+</div>
+<h1 class="text-lg font-bold mt-2 text-gray-800 leading-tight">Premium Smartphone Pro 14 256GB - 加纳官方正品保障</h1>
+<p class="text-gray-400 text-xs mt-2">已售出 1,240 件 | 加纳阿克拉仓库发货</p>
+</div>
+<!-- SKU Selection -->
+<div class="px-4 py-3 border-t border-gray-100">
+<h3 class="text-sm font-bold text-gray-800 mb-3">选择颜色</h3>
+<div class="flex gap-3">
+<button class="px-4 py-2 rounded-lg border-2 border-[#F7B500] bg-orange-50 text-xs font-medium">深空灰</button>
+<button class="px-4 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-600">极光银</button>
+<button class="px-4 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-600">远峰蓝</button>
+</div>
+<h3 class="text-sm font-bold text-gray-800 mt-5 mb-3">购买数量</h3>
+<div class="flex items-center gap-4">
+<div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+<button class="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-400" onclick="updateQty(-1)">
+<iconify-icon icon="mdi:minus"></iconify-icon>
+</button>
+<input class="w-12 h-10 text-center text-sm font-bold outline-none" id="qty" readonly="" type="number" value="1"/>
+<button class="w-10 h-10 flex items-center justify-center bg-gray-50 text-[#F7B500]" onclick="updateQty(1)">
+<iconify-icon icon="mdi:plus"></iconify-icon>
+</button>
+</div>
+<span class="text-xs text-gray-400">库存: 48 块</span>
+</div>
+</div>
+<!-- Tabs -->
+<div class="mt-4">
+<div class="flex border-b border-gray-100">
+<button class="flex-1 py-3 text-sm tab-active">图文详情</button>
+<button class="flex-1 py-3 text-sm text-gray-400">规格参数</button>
+<button class="flex-1 py-3 text-sm text-gray-400">用户评价(2k+)</button>
+</div>
+<div class="p-4">
+<p class="text-sm text-gray-600 leading-relaxed">
+                    这款旗舰手机专为加纳市场优化，支持所有本地运营商网络（MTN, Vodafone, AirtelTigo）。配备超清摄像头，适合捕捉加纳美丽的自然风光。
+                </p>
+<img alt="Product Detail Image 1" class="w-full rounded-xl mt-4" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/2ab3332b1a784201a703c722e8a9a33a.jpg"/>
+<img alt="Product Detail Image 2" class="w-full rounded-xl mt-4" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/f413c26da05545ef94bb9a816334a1c5.jpg"/>
+</div>
+</div>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-4 py-3 flex items-center gap-3 z-50">
+<div class="flex gap-4 px-2">
+<div class="flex flex-col items-center gap-1 text-gray-400">
+<iconify-icon class="text-2xl" icon="mdi:heart-outline"></iconify-icon>
+<span class="text-[9px]">收藏</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-400">
+<iconify-icon class="text-2xl" icon="mdi:message-text-outline"></iconify-icon>
+<span class="text-[9px]">客服</span>
+</div>
+</div>
+<button class="flex-1 h-12 bg-[#006B3F] text-white rounded-xl font-bold text-sm" onclick="showToast('已加入购物车')">加入购物车</button>
+<a class="flex-1 h-12 bg-[#F7B500] text-black rounded-xl font-bold text-sm flex items-center justify-center" href="checkout.html">立即购买</a>
+</div>
+<!-- Toast -->
+<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white px-6 py-3 rounded-full text-sm z-[100] hidden" id="toast">
+            已加入购物车
+        </div>
+</div>
+<script>
+        function updateQty(val) {
+            const input = document.getElementById('qty');
+            let current = parseInt(input.value);
+            if (current + val >= 1) {
+                input.value = current + val;
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+    </script>
+</body>
+</html>

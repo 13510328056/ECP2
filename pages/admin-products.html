@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>商品管理 - GH Elite</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+        body { background-color: #f8fafc; }
+        .mobile-container { width: 375px; margin: 0 auto; background: #f8fafc; position: relative; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .filter-collapse { transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        .filter-collapse.open { max-height: 600px; opacity: 1; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+    </style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-24">
+<!-- Toast -->
+<div class="toast hidden" id="toast"></div>
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+<div class="bg-white rounded-2xl mx-4 p-6 max-w-xs w-full shadow-2xl">
+<div class="text-center">
+<div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+<iconify-icon class="text-3xl text-red-500" icon="mdi:alert-circle-outline"></iconify-icon>
+</div>
+<h3 class="text-base font-black text-gray-800 mb-2">确认删除</h3>
+<p class="text-xs text-gray-500 mb-6" id="confirmMsg">确定要删除所选商品吗？此操作不可恢复。</p>
+<div class="flex gap-3">
+<button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm font-bold text-gray-600" id="cancelDeleteBtn">取消</button>
+<button class="flex-1 h-11 rounded-xl bg-red-500 text-sm font-bold text-white" id="confirmDeleteBtn">确认删除</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Header -->
+<header class="bg-white px-4 py-4 flex items-center justify-between sticky top-0 z-50 border-b border-gray-100">
+<div class="flex items-center gap-2">
+<a href="admin-dashboard.html"><img alt="Li's" class="h-8 w-auto" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<h1 class="text-lg font-black text-gray-800">商品管理</h1>
+</div>
+<a class="bg-[#1E3A5F] text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-md" href="admin-product-create.html">
+<iconify-icon icon="mdi:plus"></iconify-icon>
+            新增商品
+        </a>
+</header>
+<!-- Filter Section -->
+<div class="p-4 bg-white mx-3 mt-3 rounded-2xl shadow-sm border border-gray-50">
+<!-- Basic Search & Status (always visible) -->
+<div class="space-y-3">
+<div class="relative">
+<iconify-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg" icon="mdi:magnify"></iconify-icon>
+<input class="w-full h-11 bg-gray-50 rounded-xl pl-10 pr-4 text-xs border border-gray-100 outline-none focus:border-[#F7B500]" id="searchInput" placeholder="搜索商品名称/SKU..." type="text"/>
+</div>
+<div>
+<div class="flex gap-1 bg-gray-50 rounded-lg p-1" id="statusFilter">
+<button class="flex-1 py-2 px-3 text-[11px] font-bold rounded-lg transition-all bg-[#1E3A5F] text-white" data-status="all">全部</button>
+<button class="flex-1 py-2 px-3 text-[11px] font-medium rounded-lg transition-all text-gray-500" data-status="active">上架</button>
+<button class="flex-1 py-2 px-3 text-[11px] font-medium rounded-lg transition-all text-gray-500" data-status="inactive">下架</button>
+</div>
+</div>
+</div>
+<!-- Toggle more filters -->
+<button class="w-full mt-3 flex items-center justify-center gap-1 text-[11px] font-bold text-[#1E3A5F] py-2" id="toggleMoreFilter" type="button">
+<span id="toggleFilterText">更多筛选</span>
+<iconify-icon icon="mdi:chevron-down" id="toggleFilterIcon"></iconify-icon>
+</button>
+<!-- Advanced filters (collapsible) -->
+<div class="filter-collapse" id="advancedFilters">
+<div class="pt-3 border-t border-gray-100 space-y-4">
+<!-- Category -->
+<div>
+<label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">分类</label>
+<div class="flex flex-wrap gap-2" id="categoryFilter">
+<button class="px-3 py-1.5 bg-[#1E3A5F] text-white rounded-lg text-[10px] font-bold" data-cat="all">全部</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="服装">服装</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="电子产品">电子产品</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="食品">食品</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="家居">家居</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="美妆">美妆</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="母婴">母婴</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-cat="配件">配件</button>
+</div>
+</div>
+<!-- Brand -->
+<div>
+<label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">品牌</label>
+<div class="flex flex-wrap gap-2" id="brandFilter">
+<button class="px-3 py-1.5 bg-[#1E3A5F] text-white rounded-lg text-[10px] font-bold" data-brand="all">全部</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-brand="加纳本土品牌">加纳本土品牌</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-brand="国际品牌">国际品牌</button>
+<button class="px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium" data-brand="其他">其他</button>
+</div>
+</div>
+<!-- Stock Status -->
+<div>
+<label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">库存状态</label>
+<div class="flex gap-1 bg-gray-50 rounded-lg p-1" id="stockStatusFilter">
+<button class="flex-1 py-2 px-3 text-[10px] font-bold rounded-lg transition-all bg-[#1E3A5F] text-white" data-stock="all">全部</button>
+<button class="flex-1 py-2 px-3 text-[10px] font-medium rounded-lg transition-all text-gray-500" data-stock="充足">充足</button>
+<button class="flex-1 py-2 px-3 text-[10px] font-medium rounded-lg transition-all text-gray-500" data-stock="不足">不足</button>
+<button class="flex-1 py-2 px-3 text-[10px] font-medium rounded-lg transition-all text-gray-500" data-stock="缺货">缺货</button>
+</div>
+</div>
+<!-- Price Range -->
+<div>
+<label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">价格区间 (₵)</label>
+<div class="flex items-center gap-2">
+<input class="w-full h-9 bg-gray-50 rounded-lg px-3 text-xs border border-gray-100 outline-none focus:border-[#F7B500]" id="priceMin" placeholder="最低价" type="number"/>
+<span class="text-gray-300 text-xs">—</span>
+<input class="w-full h-9 bg-gray-50 rounded-lg px-3 text-xs border border-gray-100 outline-none focus:border-[#F7B500]" id="priceMax" placeholder="最高价" type="number"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Batch Operations Bar -->
+<div class="mx-3 mt-3 bg-white rounded-2xl border border-gray-50 shadow-sm" id="batchBar">
+<div class="flex items-center justify-between px-4 py-3">
+<div class="flex items-center gap-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#1E3A5F]" id="selectAllCheckbox" type="checkbox"/>
+<span class="text-[10px] font-bold text-gray-500">全选</span>
+</label>
+<span class="text-[10px] text-gray-400" id="selectedCount">已选择 0 项</span>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-[10px] font-bold cursor-not-allowed" disabled="" id="batchEnableBtn">批量上架</button>
+<button class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-[10px] font-bold cursor-not-allowed" disabled="" id="batchDisableBtn">批量下架</button>
+<button class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-[10px] font-bold cursor-not-allowed" disabled="" id="batchDeleteBtn">批量删除</button>
+</div>
+</div>
+</div>
+<!-- Product List -->
+<div class="px-4 mt-3 space-y-3" id="productList">
+<!-- Product Item 1 -->
+<div class="bg-white p-3 rounded-2xl border border-gray-50 shadow-sm flex gap-3" data-category="电子产品" data-price="4250" data-product-id="1" data-status="active" data-stock="充足">
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+<img alt="Smartphone Pro 14 product photo" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/64fb0f7762d84a7db5bc3953394dc4a5.jpg"/>
+<div class="absolute top-1 left-1">
+<input class="item-checkbox w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#1E3A5F]" type="checkbox"/>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1">
+<h3 class="text-xs font-bold text-gray-800 truncate">Smartphone Pro 14</h3>
+<span class="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">上架</span>
+</div>
+<p class="text-[9px] text-gray-400 mt-0.5 truncate">SKU: GH-PH-14-256-GR</p>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[9px] font-bold text-white bg-[#1E3A5F] px-1.5 py-0.5 rounded">电子产品</span>
+<span class="text-xs font-black text-[#F7B500]">₵ 4,250.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-green-500 text-xs" icon="mdi:check-circle"></iconify-icon>
+<span class="text-[10px] text-green-600 font-medium">48 件 (充足)</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 mt-2">
+<button class="text-[10px] font-bold text-blue-600 flex items-center gap-1 edit-btn">
+<iconify-icon icon="mdi:pencil-outline"></iconify-icon>
+                    编辑
+                </button>
+<button class="text-[10px] font-bold text-red-400 flex items-center gap-1 delete-btn">
+<iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
+                    删除
+                </button>
+</div>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="bg-white p-3 rounded-2xl border border-gray-50 shadow-sm flex gap-3" data-category="服装" data-price="320" data-product-id="2" data-status="active" data-stock="不足">
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+<img alt="Traditional Kente Dress product photo" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/310e574c7a0e4522a16dda97a2ab028b.jpg"/>
+<div class="absolute top-1 left-1">
+<input class="item-checkbox w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#1E3A5F]" type="checkbox"/>
+</div>
+<div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+<span class="text-white text-[9px] font-bold bg-orange-500 px-2 py-0.5 rounded">库存不足</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1">
+<h3 class="text-xs font-bold text-gray-800 truncate">Traditional Kente Dress</h3>
+<span class="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">上架</span>
+</div>
+<p class="text-[9px] text-gray-400 mt-0.5 truncate">SKU: GH-CL-KT-DR-M</p>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[9px] font-bold text-white bg-[#1E3A5F] px-1.5 py-0.5 rounded">服装</span>
+<span class="text-xs font-black text-[#F7B500]">₵ 320.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-orange-500 text-xs" icon="mdi:alert-circle"></iconify-icon>
+<span class="text-[10px] text-orange-600 font-medium">2 件 (不足)</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 mt-2">
+<button class="text-[10px] font-bold text-blue-600 flex items-center gap-1 edit-btn">
+<iconify-icon icon="mdi:pencil-outline"></iconify-icon>
+                    编辑
+                </button>
+<button class="text-[10px] font-bold text-red-400 flex items-center gap-1 delete-btn">
+<iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
+                    删除
+                </button>
+</div>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="bg-white p-3 rounded-2xl border border-gray-50 shadow-sm flex gap-3" data-category="配件" data-price="850" data-product-id="3" data-status="inactive" data-stock="充足">
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+<img alt="Wireless Headphones X product photo" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/fca395eee5174564b8aa68dab0067e5d.jpg"/>
+<div class="absolute top-1 left-1">
+<input class="item-checkbox w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#1E3A5F]" type="checkbox"/>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1">
+<h3 class="text-xs font-bold text-gray-800 truncate">Wireless Headphones X</h3>
+<span class="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded whitespace-nowrap">下架</span>
+</div>
+<p class="text-[9px] text-gray-400 mt-0.5 truncate">SKU: GH-AU-WL-HP-BLK</p>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[9px] font-bold text-white bg-[#1E3A5F] px-1.5 py-0.5 rounded">配件</span>
+<span class="text-xs font-black text-[#F7B500]">₵ 850.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-green-500 text-xs" icon="mdi:check-circle"></iconify-icon>
+<span class="text-[10px] text-green-600 font-medium">156 件 (充足)</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 mt-2">
+<button class="text-[10px] font-bold text-blue-600 flex items-center gap-1 edit-btn">
+<iconify-icon icon="mdi:pencil-outline"></iconify-icon>
+                    编辑
+                </button>
+<button class="text-[10px] font-bold text-red-400 flex items-center gap-1 delete-btn">
+<iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
+                    删除
+                </button>
+</div>
+</div>
+</div>
+<!-- Product Item 4 -->
+<div class="bg-white p-3 rounded-2xl border border-gray-50 shadow-sm flex gap-3" data-category="食品" data-price="45" data-product-id="4" data-status="active" data-stock="缺货">
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+<img alt="Organic Honey product photo" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/ad7ef275327e42f7a195473a8c823b74.jpg"/>
+<div class="absolute top-1 left-1">
+<input class="item-checkbox w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#1E3A5F]" type="checkbox"/>
+</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+<span class="text-white text-[9px] font-bold bg-red-500 px-2 py-0.5 rounded">缺货</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1">
+<h3 class="text-xs font-bold text-gray-800 truncate">Organic Honey 500g</h3>
+<span class="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap">上架</span>
+</div>
+<p class="text-[9px] text-gray-400 mt-0.5 truncate">SKU: GH-FD-OG-HN-500</p>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[9px] font-bold text-white bg-[#1E3A5F] px-1.5 py-0.5 rounded">食品</span>
+<span class="text-xs font-black text-[#F7B500]">₵ 45.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-red-500 text-xs" icon="mdi:close-circle"></iconify-icon>
+<span class="text-[10px] text-red-600 font-medium">0 件 (缺货)</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 mt-2">
+<button class="text-[10px] font-bold text-blue-600 flex items-center gap-1 edit-btn">
+<iconify-icon icon="mdi:pencil-outline"></iconify-icon>
+                    编辑
+                </button>
+<button class="text-[10px] font-bold text-red-400 flex items-center gap-1 delete-btn">
+<iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
+                    删除
+                </button>
+</div>
+</div>
+</div>
+<!-- Product Item 5 -->
+<div class="bg-white p-3 rounded-2xl border border-gray-50 shadow-sm flex gap-3" data-category="家居" data-price="1200" data-product-id="5" data-status="inactive" data-stock="充足">
+<div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden relative">
+<img alt="Handcrafted Wooden Stool product photo" class="w-full h-full object-cover" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/b875259d986f41d1bf1652257f6aaa94.jpg"/>
+<div class="absolute top-1 left-1">
+<input class="item-checkbox w-4 h-4 rounded border-gray-300 text-[#1E3A5F] focus:ring-[#1E3A5F]" type="checkbox"/>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<div class="flex items-center justify-between gap-1">
+<h3 class="text-xs font-bold text-gray-800 truncate">Handcrafted Wooden Stool</h3>
+<span class="text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded whitespace-nowrap">下架</span>
+</div>
+<p class="text-[9px] text-gray-400 mt-0.5 truncate">SKU: GH-HM-WD-STL-A</p>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[9px] font-bold text-white bg-[#1E3A5F] px-1.5 py-0.5 rounded">家居</span>
+<span class="text-xs font-black text-[#F7B500]">₵ 1,200.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<iconify-icon class="text-green-500 text-xs" icon="mdi:check-circle"></iconify-icon>
+<span class="text-[10px] text-green-600 font-medium">320 件 (充足)</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-3 mt-2">
+<button class="text-[10px] font-bold text-blue-600 flex items-center gap-1 edit-btn">
+<iconify-icon icon="mdi:pencil-outline"></iconify-icon>
+                    编辑
+                </button>
+<button class="text-[10px] font-bold text-red-400 flex items-center gap-1 delete-btn">
+<iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
+                    删除
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="px-4 mt-4">
+<div class="bg-white rounded-2xl border border-gray-50 shadow-sm px-4 py-3 flex items-center justify-between">
+<button class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50" id="prevPage">
+<iconify-icon icon="mdi:chevron-left"></iconify-icon>
+</button>
+<div class="flex items-center gap-1" id="pageNumbers">
+<button class="w-8 h-8 rounded-lg bg-[#1E3A5F] text-white text-[11px] font-bold">1</button>
+<button class="w-8 h-8 rounded-lg text-gray-500 text-[11px] font-medium hover:bg-gray-50">2</button>
+<button class="w-8 h-8 rounded-lg text-gray-500 text-[11px] font-medium hover:bg-gray-50">3</button>
+<span class="text-gray-300 text-xs px-1">...</span>
+<button class="w-8 h-8 rounded-lg text-gray-500 text-[11px] font-medium hover:bg-gray-50">10</button>
+</div>
+<button class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50" id="nextPage">
+<iconify-icon icon="mdi:chevron-right"></iconify-icon>
+</button>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] bg-white border-t border-gray-100 px-6 py-2 flex items-center justify-between z-50">
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-dashboard.html">
+<iconify-icon class="text-2xl" icon="mdi:view-dashboard-outline"></iconify-icon>
+<span class="text-[10px] font-medium">看板</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#1E3A5F]" href="admin-products.html">
+<iconify-icon class="text-2xl" icon="mdi:package-variant-closed"></iconify-icon>
+<span class="text-[10px] font-medium">商品</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-orders.html">
+<iconify-icon class="text-2xl" icon="mdi:clipboard-list-outline"></iconify-icon>
+<span class="text-[10px] font-medium">订单</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="admin-categories.html">
+<iconify-icon class="text-2xl" icon="mdi:tag-text-outline"></iconify-icon>
+<span class="text-[10px] font-medium">分类</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400" href="home.html">
+<iconify-icon class="text-2xl" icon="mdi:logout"></iconify-icon>
+<span class="text-[10px] font-medium">退出</span>
+</a>
+</nav>
+</div>
+<script>
+(function() {
+    // Toast
+    function showToast(msg, type) {
+        var t = document.getElementById('toast');
+        t.className = 'toast px-6 py-3 rounded-xl text-sm font-bold shadow-lg text-white ' + (type === 'error' ? 'bg-red-500' : 'bg-[#1E3A5F]');
+        t.textContent = msg;
+        t.classList.remove('hidden');
+        setTimeout(function(){ t.classList.add('hidden'); }, 2500);
+    }
+
+    // Toggle advanced filters
+    var toggleBtn = document.getElementById('toggleMoreFilter');
+    var advFilters = document.getElementById('advancedFilters');
+    var toggleIcon = document.getElementById('toggleFilterIcon');
+    var toggleText = document.getElementById('toggleFilterText');
+    toggleBtn.addEventListener('click', function() {
+        advFilters.classList.toggle('open');
+        toggleIcon.setAttribute('icon', advFilters.classList.contains('open') ? 'mdi:chevron-up' : 'mdi:chevron-down');
+        toggleText.textContent = advFilters.classList.contains('open') ? '收起筛选' : '更多筛选';
+    });
+
+    // Status filter buttons
+    var statusBtns = document.querySelectorAll('#statusFilter button');
+    statusBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            statusBtns.forEach(function(b) {
+                b.className = 'flex-1 py-2 px-3 text-[11px] font-medium rounded-lg transition-all text-gray-500';
+            });
+            this.className = 'flex-1 py-2 px-3 text-[11px] font-bold rounded-lg transition-all bg-[#1E3A5F] text-white';
+        });
+    });
+
+    // Category filter buttons
+    var catBtns = document.querySelectorAll('#categoryFilter button');
+    catBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            catBtns.forEach(function(b) {
+                b.className = 'px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium';
+            });
+            this.className = 'px-3 py-1.5 bg-[#1E3A5F] text-white rounded-lg text-[10px] font-bold';
+        });
+    });
+
+    // Brand filter buttons
+    var brandBtns = document.querySelectorAll('#brandFilter button');
+    brandBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            brandBtns.forEach(function(b) {
+                b.className = 'px-3 py-1.5 bg-white text-gray-500 border border-gray-200 rounded-lg text-[10px] font-medium';
+            });
+            this.className = 'px-3 py-1.5 bg-[#1E3A5F] text-white rounded-lg text-[10px] font-bold';
+        });
+    });
+
+    // Stock status filter buttons
+    var stockBtns = document.querySelectorAll('#stockStatusFilter button');
+    stockBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            stockBtns.forEach(function(b) {
+                b.className = 'flex-1 py-2 px-3 text-[10px] font-medium rounded-lg transition-all text-gray-500';
+            });
+            this.className = 'flex-1 py-2 px-3 text-[10px] font-bold rounded-lg transition-all bg-[#1E3A5F] text-white';
+        });
+    });
+
+    // Select All checkbox
+    var selectAll = document.getElementById('selectAllCheckbox');
+    var itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    var selectedCount = document.getElementById('selectedCount');
+    var batchEnableBtn = document.getElementById('batchEnableBtn');
+    var batchDisableBtn = document.getElementById('batchDisableBtn');
+    var batchDeleteBtn = document.getElementById('batchDeleteBtn');
+
+    function updateBatchBar() {
+        var checked = document.querySelectorAll('.item-checkbox:checked');
+        var count = checked.length;
+        selectedCount.textContent = '已选择 ' + count + ' 项';
+
+        // Check if any checked items are inactive (下架) -> batch enable possible
+        var hasInactive = false;
+        var hasActive = false;
+        checked.forEach(function(cb) {
+            var card = cb.closest('[data-product-id]');
+            if (card && card.dataset.status === 'inactive') hasInactive = true;
+            if (card && card.dataset.status === 'active') hasActive = true;
+        });
+
+        batchEnableBtn.disabled = count === 0 || !hasInactive;
+        batchEnableBtn.className = 'px-3 py-1.5 rounded-lg text-[10px] font-bold ' + (batchEnableBtn.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-50 text-green-600 hover:bg-green-100 cursor-pointer');
+
+        batchDisableBtn.disabled = count === 0 || !hasActive;
+        batchDisableBtn.className = 'px-3 py-1.5 rounded-lg text-[10px] font-bold ' + (batchDisableBtn.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-orange-50 text-orange-600 hover:bg-orange-100 cursor-pointer');
+
+        batchDeleteBtn.disabled = count === 0;
+        batchDeleteBtn.className = 'px-3 py-1.5 rounded-lg text-[10px] font-bold ' + (batchDeleteBtn.disabled ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer');
+    }
+
+    selectAll.addEventListener('change', function() {
+        itemCheckboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+        updateBatchBar();
+    });
+
+    itemCheckboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var allChecked = true;
+            itemCheckboxes.forEach(function(c) { if (!c.checked) allChecked = false; });
+            selectAll.checked = allChecked;
+            updateBatchBar();
+        });
+    });
+
+    // Confirm modal
+    var modal = document.getElementById('confirmModal');
+    var cancelBtn = document.getElementById('cancelDeleteBtn');
+    var confirmBtn = document.getElementById('confirmDeleteBtn');
+    var pendingDelete = null;
+
+    cancelBtn.addEventListener('click', function() { modal.classList.remove('open'); });
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.classList.remove('open');
+    });
+
+    function confirmDelete(msg, cb) {
+        document.getElementById('confirmMsg').textContent = msg;
+        pendingDelete = cb;
+        modal.classList.add('open');
+    }
+
+    confirmBtn.addEventListener('click', function() {
+        if (pendingDelete) pendingDelete();
+        modal.classList.remove('open');
+        pendingDelete = null;
+    });
+
+    // Delete single product
+    document.querySelectorAll('.delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var card = this.closest('[data-product-id]');
+            var name = card ? card.querySelector('h3').textContent : '该商品';
+            confirmDelete('确定要删除「' + name + '」吗？此操作不可恢复。', function() {
+                card.remove();
+                showToast('已删除「' + name + '」', 'success');
+                updateBatchBar();
+            });
+        });
+    });
+
+    // Batch delete
+    batchDeleteBtn.addEventListener('click', function() {
+        if (batchDeleteBtn.disabled) return;
+        var checked = document.querySelectorAll('.item-checkbox:checked');
+        confirmDelete('确定要删除所选 ' + checked.length + ' 项商品吗？此操作不可恢复。', function() {
+            checked.forEach(function(cb) {
+                var card = cb.closest('[data-product-id]');
+                if (card) card.remove();
+            });
+            showToast('批量删除成功', 'success');
+            updateBatchBar();
+        });
+    });
+
+    // Batch enable
+    batchEnableBtn.addEventListener('click', function() {
+        if (batchEnableBtn.disabled) return;
+        var checked = document.querySelectorAll('.item-checkbox:checked');
+        checked.forEach(function(cb) {
+            var card = cb.closest('[data-product-id]');
+            if (card && card.dataset.status === 'inactive') {
+                card.dataset.status = 'active';
+                var statusEl = card.querySelector('[class*="rounded"][class*="font-bold"]');
+                if (statusEl && statusEl.tagName === 'SPAN') {
+                    statusEl.textContent = '上架';
+                    statusEl.className = 'text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded whitespace-nowrap';
+                }
+            }
+        });
+        showToast('批量上架成功', 'success');
+        updateBatchBar();
+    });
+
+    // Batch disable
+    batchDisableBtn.addEventListener('click', function() {
+        if (batchDisableBtn.disabled) return;
+        var checked = document.querySelectorAll('.item-checkbox:checked');
+        checked.forEach(function(cb) {
+            var card = cb.closest('[data-product-id]');
+            if (card && card.dataset.status === 'active') {
+                card.dataset.status = 'inactive';
+                var statusEl = card.querySelector('[class*="rounded"][class*="font-bold"]');
+                if (statusEl && statusEl.tagName === 'SPAN' && (statusEl.textContent === '上架' || statusEl.textContent === '已上架')) {
+                    statusEl.textContent = '下架';
+                    statusEl.className = 'text-[9px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded whitespace-nowrap';
+                }
+            }
+        });
+        showToast('批量下架成功', 'success');
+        updateBatchBar();
+    });
+
+    // Pagination click
+    document.querySelectorAll('#pageNumbers button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#pageNumbers button').forEach(function(b) {
+                b.className = 'w-8 h-8 rounded-lg text-gray-500 text-[11px] font-medium hover:bg-gray-50';
+            });
+            this.className = 'w-8 h-8 rounded-lg bg-[#1E3A5F] text-white text-[11px] font-bold';
+            showToast('已切换到第 ' + this.textContent + ' 页', 'success');
+        });
+    });
+
+    document.getElementById('prevPage').addEventListener('click', function() {
+        showToast('已切换到上一页', 'success');
+    });
+
+    document.getElementById('nextPage').addEventListener('click', function() {
+        showToast('已切换到下一页', 'success');
+    });
+})();
+</script>
+</body>
+</html>

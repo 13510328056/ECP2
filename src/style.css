@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1E3A5F;
+  --color-primary-50: #E8EDF3;
+  --color-primary-100: #D1DBE7;
+  --color-primary-200: #A3B7CF;
+  --color-primary-300: #7593B7;
+  --color-primary-400: #476F9F;
+  --color-primary-500: #1E3A5F;
+  --color-primary-600: #1A3354;
+  --color-primary-700: #162C49;
+  --color-primary-800: #12253E;
+  --color-primary-900: #0E1E33;
+
+  --color-accent: #F7B500;
+  --color-accent-hover: #E5A000;
+  --color-accent-light: #FFF8E1;
+
+  --color-success: #10B981;
+  --color-success-light: #ECFDF5;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FFFBEB;
+  --color-error: #EF4444;
+  --color-error-light: #FEF2F2;
+
+  --color-admin: #006B3F;
+  --color-admin-hover: #005A35;
+}
+
+* {
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f3f4f6;
+  margin: 0;
+  padding: 0;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Page transition */
+.page-enter-active {
+  animation: pageIn 0.3s ease-out;
+}
+.page-leave-active {
+  animation: pageOut 0.2s ease-in;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pageOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Toast animation */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+/* Skeleton loading */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}

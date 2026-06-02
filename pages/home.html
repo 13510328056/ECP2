@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Li's Industrial Mart - 首页</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<style>
+    * { transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; }
+    html { scroll-behavior: smooth; }
+    body { background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+    .mobile-container { width: 375px; max-width: 480px; margin: 0 auto; background: white; position: relative; overflow-y: auto; overflow-x: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-height: 100vh; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .active-tab { color: #F7B500 !important; }
+    .active-tab span.tab-label { color: #F7B500 !important; }
+    .carousel-slide { transition: opacity 0.5s ease-in-out; position: absolute; inset: 0; }
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.25); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: white; border: none; }
+    .carousel-btn:hover { background: rgba(255,255,255,0.4); }
+    .carousel-btn:active { transform: translateY(-50%) scale(0.92); }
+    .product-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    .product-card:active { transform: translateY(-1px); }
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1E3A5F; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 999; opacity: 0; transition: all 0.3s ease; pointer-events: none; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .cat-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .cat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .cat-card:active { transform: translateY(0); }
+    .search-suggest { display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 12px 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 50; }
+    .search-suggest.show { display: block; }
+    .scroll-top::-webkit-scrollbar { display: none; }
+    .gold-price { color: #D4A017; }
+    .btn-primary { background-color: #1E3A5F; color: white; }
+    .btn-primary:hover { background-color: #152d4a; }
+    .btn-primary:active { background-color: #0f1f33; }
+    .btn-gold { background-color: #F7B500; color: #1E3A5F; }
+    .btn-gold:hover { background-color: #e0a200; }
+    .btn-gold:active { background-color: #c99000; }
+    .fa-star, .fa-star-half-alt { color: #F7B500; }
+    .fa-star.off { color: #d1d5db; }
+    /* Language Switcher */
+    .lang-btn { cursor: pointer; user-select: none; }
+    .lang-dropdown { display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 60; min-width: 100px; overflow: hidden; }
+    .lang-dropdown.show { display: block; }
+    .lang-dropdown div { padding: 8px 14px; font-size: 13px; cursor: pointer; }
+    .lang-dropdown div:hover { background: #f3f4f6; }
+    .lang-dropdown div.active { background: #1E3A5F; color: white; }
+    /* WhatsApp Float */
+    .whatsapp-float { position: fixed; bottom: 100px; right: calc(50% - 180px); z-index: 45; }
+    @media (max-width: 480px) { .whatsapp-float { right: 16px; } }
+    .whatsapp-btn { width: 52px; height: 52px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,211,102,0.4); animation: pulse-wa 2s infinite; border: none; }
+    .whatsapp-btn:hover { transform: scale(1.05); }
+    .whatsapp-btn:active { transform: scale(0.95); }
+    @keyframes pulse-wa { 0%,100% { box-shadow: 0 4px 12px rgba(37,211,102,0.4); } 50% { box-shadow: 0 4px 20px rgba(37,211,102,0.7); } }
+    .whatsapp-popup { display: none; position: absolute; bottom: 62px; right: 0; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); width: 260px; overflow: hidden; z-index: 46; }
+    .whatsapp-popup.show { display: block; }
+    .whatsapp-popup .popup-header { background: #075E54; color: white; padding: 12px 14px; font-size: 14px; font-weight: 600; }
+    .whatsapp-popup .popup-body { padding: 14px; }
+    .whatsapp-popup .popup-body p { font-size: 13px; color: #333; margin-bottom: 8px; }
+    .whatsapp-popup .popup-body .phone { font-size: 15px; font-weight: 600; color: #075E54; }
+    .whatsapp-popup .popup-body .btn-send { display: block; width: 100%; padding: 10px; background: #25D366; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; margin-top: 6px; }
+    .whatsapp-popup .popup-body .btn-send:hover { background: #20bd5a; }
+    /* Testimonials */
+    .testimonial-card { display: none; }
+    .testimonial-card.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .testimonial-dot.active { background: #F7B500; width: 20px; border-radius: 10px; }
+    /* Modal overlay */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: white; border-radius: 16px; padding: 24px; width: 320px; max-width: 90vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+    .modal-box h3 { font-size: 18px; font-weight: 700; color: #1E3A5F; margin-bottom: 16px; }
+    .modal-box input, .modal-box textarea { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; margin-bottom: 12px; box-sizing: border-box; }
+    .modal-box input:focus, .modal-box textarea:focus { border-color: #F7B500; }
+    .modal-box textarea { height: 80px; resize: vertical; }
+    .modal-close { float: right; cursor: pointer; font-size: 20px; color: #999; line-height: 1; }
+    .modal-close:hover { color: #333; }
+    /* Scroll shadow on header */
+    .header-shadow { transition: box-shadow 0.3s ease; }
+    .header-shadow.scrolled { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+</style>
+</head>
+<body>
+<div class="mobile-container hide-scrollbar pb-20" id="app">
+<!-- ===== Header (Sticky) ===== -->
+<header class="sticky top-0 z-50 bg-white px-3 py-2.5 flex items-center gap-2 border-b border-gray-100 header-shadow" id="mainHeader">
+<a href="home.html"><img alt="Li's Industrial Mart logo" class="h-9 w-auto flex-shrink-0" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/></a>
+<div class="flex-1 relative">
+<div class="relative">
+<iconify-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none" icon="mdi:magnify"></iconify-icon>
+<input class="w-full h-9 bg-gray-100 rounded-xl pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-[#F7B500]/50" id="searchInput" onblur="hideSearchSuggest()" onfocus="showSearchSuggest()" placeholder="搜索商品..." type="text"/>
+</div>
+<div class="search-suggest" id="searchSuggest">
+<div class="px-4 py-3 text-sm text-gray-500 border-t border-gray-100">
+<p class="mb-2 font-medium text-gray-700">热门搜索</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600 cursor-pointer hover:bg-[#F7B500]/20">Drill Bits</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600 cursor-pointer hover:bg-[#F7B500]/20">Work Gloves</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600 cursor-pointer hover:bg-[#F7B500]/20">Safety Helmet</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600 cursor-pointer hover:bg-[#F7B500]/20">Welding Machine</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600 cursor-pointer hover:bg-[#F7B500]/20">Cable Wire</span>
+<span class="px-3 py-1 bg-gray-100 rounded-full text-xs text-gray-600 cursor-pointer hover:bg-[#F7B500]/20">Measuring Tape</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<!-- Language Switcher -->
+<div class="relative lang-btn" id="langSwitcher">
+<div class="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-700 cursor-pointer" onclick="toggleLangDropdown(event)">
+<span id="langLabel">中</span>
+<span class="text-gray-400">/</span>
+<span>EN</span>
+<iconify-icon class="text-xs text-gray-500 ml-0.5" icon="mdi:chevron-down"></iconify-icon>
+</div>
+<div class="lang-dropdown" id="langDropdown">
+<div class="active" data-lang="zh" onclick="switchLang('zh')">中文</div>
+<div data-lang="en" onclick="switchLang('en')">English</div>
+</div>
+</div>
+<a class="relative" href="cart.html">
+<iconify-icon class="text-2xl text-gray-700" icon="mdi:cart-outline"></iconify-icon>
+<span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">3</span>
+</a>
+</div>
+</header>
+<!-- ===== Hero Banner Carousel ===== -->
+<section class="px-3 pt-3">
+<div class="relative h-44 rounded-2xl overflow-hidden shadow-md" id="carousel">
+<!-- Slide 1 -->
+<div class="carousel-slide" data-index="0">
+<div class="w-full h-full bg-gradient-to-br from-[#1E3A5F] to-[#D4A017] flex flex-col justify-center px-6">
+<span class="text-[#F7B500] font-bold text-xs uppercase tracking-widest" data-en="🔥 BIG SALE" data-zh="🔥 大促特惠">🔥 大促特惠</span>
+<h2 class="text-white text-xl font-bold mt-2 leading-tight" data-en="Industrial Supplies&lt;br/&gt;at Wholesale Prices" data-zh="工业耗材&lt;br/&gt;批发好价"><span data-en="Industrial Supplies" data-zh="工业耗材">工业耗材</span><br/><span data-en="at Wholesale Prices" data-zh="批发好价">批发好价</span></h2>
+<p class="text-white/70 text-xs mt-2" data-en="Top quality tools &amp; equipment for your business" data-zh="为您的企业提供优质工具与设备">为您的企业提供优质工具与设备</p>
+<a class="mt-3 bg-[#F7B500] text-[#1E3A5F] px-5 py-1.5 rounded-full text-xs font-bold w-max hover:bg-[#e0a200] transition" data-en="Shop Now" data-zh="立即抢购" href="#">立即抢购</a>
+</div>
+</div>
+<!-- Slide 2 -->
+<div class="carousel-slide opacity-0" data-index="1">
+<div class="w-full h-full bg-gradient-to-br from-[#1E3A5F] to-[#2d8a4e] flex flex-col justify-center px-6">
+<span class="text-[#F7B500] font-bold text-xs uppercase tracking-widest" data-en="✨ NEW" data-zh="✨ 新品到货">✨ 新品到货</span>
+<h2 class="text-white text-xl font-bold mt-2 leading-tight" data-en="New Arrivals&lt;br/&gt;Just Landed" data-zh="新品上架&lt;br/&gt;现货充足"><span data-en="New Arrivals" data-zh="新品上架">新品上架</span><br/><span data-en="Just Landed" data-zh="现货充足">现货充足</span></h2>
+<p class="text-white/70 text-xs mt-2" data-en="Latest industrial products in stock now" data-zh="最新工业产品现已到库">最新工业产品现已到库</p>
+<a class="mt-3 bg-[#F7B500] text-[#1E3A5F] px-5 py-1.5 rounded-full text-xs font-bold w-max hover:bg-[#e0a200] transition" data-en="Explore" data-zh="立即查看" href="#">立即查看</a>
+</div>
+</div>
+<!-- Slide 3 -->
+<div class="carousel-slide opacity-0" data-index="2">
+<div class="w-full h-full bg-gradient-to-br from-[#1E3A5F] to-[#D4A017]/80 flex flex-col justify-center px-6">
+<span class="text-[#F7B500] font-bold text-xs uppercase tracking-widest" data-en="🚚 FREE SHIPPING" data-zh="🚚 阿克拉免运费">🚚 阿克拉免运费</span>
+<h2 class="text-white text-xl font-bold mt-2 leading-tight" data-en="Free Delivery&lt;br/&gt;in Accra" data-zh="阿克拉地区&lt;br/&gt;免费配送"><span data-en="Free Delivery" data-zh="阿克拉地区">阿克拉地区</span><br/><span data-en="in Accra" data-zh="免费配送">免费配送</span></h2>
+<p class="text-white/70 text-xs mt-2" data-en="On all orders above ₵200" data-zh="订单满 ₵200 即可享受">订单满 ₵200 即可享受</p>
+<a class="mt-3 bg-[#F7B500] text-[#1E3A5F] px-5 py-1.5 rounded-full text-xs font-bold w-max hover:bg-[#e0a200] transition" data-en="Learn More" data-zh="了解更多" href="#">了解更多</a>
+</div>
+</div>
+<!-- Prev/Next -->
+<button class="carousel-btn left-2" onclick="prevSlide(event)"><iconify-icon icon="mdi:chevron-left"></iconify-icon></button>
+<button class="carousel-btn right-2" onclick="nextSlide(event)"><iconify-icon icon="mdi:chevron-right"></iconify-icon></button>
+<!-- Dots -->
+<div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+<button class="w-4 h-1.5 bg-[#F7B500] rounded-full border-0 cursor-pointer" id="dot0" onclick="goToSlide(0)"></button>
+<button class="w-1.5 h-1.5 bg-white/50 rounded-full border-0 cursor-pointer" id="dot1" onclick="goToSlide(1)"></button>
+<button class="w-1.5 h-1.5 bg-white/50 rounded-full border-0 cursor-pointer" id="dot2" onclick="goToSlide(2)"></button>
+</div>
+</div>
+</section>
+<!-- ===== Category Grid ===== -->
+<section class="px-3 pt-5 pb-2">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-base text-gray-800" data-en="Shop by Category" data-zh="商品分类">商品分类</h3>
+<a class="text-xs text-[#1E3A5F] font-medium hover:underline" data-en="View All" data-zh="查看全部" href="#" onclick="showViewAllToast(event)">查看全部</a>
+</div>
+<div class="grid grid-cols-4 gap-3">
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-blue-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:hanger"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Clothing" data-zh="服装">服装</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-purple-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:cellphone"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Electronics" data-zh="电子产品">电子产品</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-green-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:food-apple"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Food" data-zh="食品">食品</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-yellow-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:sofa"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Home" data-zh="家居">家居</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-pink-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:lipstick"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Beauty" data-zh="美妆">美妆</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:baby-face"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Baby" data-zh="母婴">母婴</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-teal-50 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:car-wrench"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Auto Parts" data-zh="汽车配件">汽车配件</span>
+</div>
+<div class="cat-card flex flex-col items-center gap-1.5 bg-white rounded-xl py-3 shadow-sm" onclick="location.href='product-detail.html'">
+<div class="w-11 h-11 bg-gray-100 rounded-2xl flex items-center justify-center">
+<iconify-icon class="text-xl text-[#1E3A5F]" icon="mdi:tools"></iconify-icon>
+</div>
+<span class="text-[10px] text-gray-600 text-center leading-tight" data-en="Industrial" data-zh="工业工具">工业工具</span>
+</div>
+</div>
+</section>
+<!-- ===== Hot Products ===== -->
+<section class="px-3 pt-5 pb-2">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-base text-gray-800" data-en="Hot Products 🔥" data-zh="热销商品 🔥">热销商品 🔥</h3>
+<a class="text-xs text-[#1E3A5F] font-medium hover:underline" data-en="View All" data-zh="查看全部" href="#" onclick="showViewAllToast(event)">查看全部</a>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- Product 1 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-gray-200 flex items-center justify-center">
+<img alt="Tungsten Carbide Drill Bits" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/bf363051d228426b9c7db19101a8707c.jpg"/>
+<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">-15%</span>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Tungsten Carbide Drill Bits</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵45.00</span>
+<span class="text-gray-400 text-[10px] line-through">₵55.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.8 (23 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-blue-100 flex items-center justify-center">
+<img alt="Heavy Duty Work Gloves" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/5d3105eaf7c9494a8c26eb399a5c5fba.jpg"/>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Heavy Duty Work Gloves</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵25.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star-half-alt text-[11px]"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.5 (18 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-yellow-100 flex items-center justify-center">
+<img alt="LED Work Light 50W" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/83b84634e5be42e3925e981f491344f7.jpg"/>
+<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">-20%</span>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">LED Work Light 50W</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵120.00</span>
+<span class="text-gray-400 text-[10px] line-through">₵150.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.7 (31 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-orange-100 flex items-center justify-center">
+<img alt="Industrial Grade Safety Helmet" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/836020131f8e4790a79ba4f1d5abd74d.jpg"/>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Industrial Grade Safety Helmet</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵35.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-regular fa-star text-[11px] text-gray-300"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.3 (15 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 5 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-green-100 flex items-center justify-center">
+<img alt="Steel Measuring Tape 50m" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/45af3c9aa32e4d5abad312c5802c60d2.jpg"/>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Steel Measuring Tape 50m</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵18.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.6 (42 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 6 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-red-100 flex items-center justify-center">
+<img alt="Wire Cable 2.5mm 50m" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/3ed0345f1620476abd4229c73ee65368.jpg"/>
+<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">-10%</span>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Wire Cable 2.5mm (50m)</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵85.00</span>
+<span class="text-gray-400 text-[10px] line-through">₵95.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star-half-alt text-[11px]"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.4 (27 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 7 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-purple-100 flex items-center justify-center">
+<img alt="Portable Welding Machine" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/ecf65a99aec44463a6047452ca322563.jpg"/>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Portable Welding Machine</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵450.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.9 (56 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+<!-- Product 8 -->
+<div class="product-card bg-white rounded-xl overflow-hidden shadow-sm">
+<a href="product-detail.html">
+<div class="relative h-32 bg-teal-100 flex items-center justify-center">
+<img alt="Heavy Duty Storage Shelf" class="w-full h-full object-contain p-3" src="https://modao.cc/agent-py/media/generated_images/2026-05-30/92e4276c8e354687a29a4a54d81e8a0b.jpg"/>
+<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">-12%</span>
+</div>
+</a>
+<div class="p-3">
+<a href="product-detail.html"><h4 class="text-sm font-medium text-gray-800 line-clamp-2 h-10 leading-tight">Heavy Duty Storage Shelf</h4></a>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="gold-price font-bold text-base">₵280.00</span>
+<span class="text-gray-400 text-[10px] line-through">₵320.00</span>
+</div>
+<div class="flex items-center gap-1 mt-1.5">
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-solid fa-star text-[11px]"></i>
+<i class="fa-regular fa-star text-[11px] text-gray-300"></i>
+<span class="text-gray-400 text-[10px] ml-1">4.2 (34 reviews)</span>
+</div>
+<button class="mt-2 w-full py-1.5 rounded-lg text-xs font-medium btn-primary hover:bg-[#152d4a] transition" onclick="addToCart(event)">Add to Cart</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ===== Inquiry Entry Banner ===== -->
+<section class="px-3 pt-5">
+<div class="bg-[#FFF8E7] border-l-4 border-[#F7B500] rounded-xl p-4 flex items-start gap-3 shadow-sm">
+<div class="w-10 h-10 bg-[#F7B500]/20 rounded-full flex items-center justify-center flex-shrink-0">
+<iconify-icon class="text-xl text-[#D4A017]" icon="mdi:email-newsletter"></iconify-icon>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-bold text-sm text-gray-800" data-en="Need Bulk Orders or Custom Quotes?" data-zh="需要批量订购或定制报价？">需要批量订购或定制报价？</h4>
+<p class="text-xs text-gray-500 mt-1 leading-relaxed" data-en="Contact our B2B team for wholesale pricing, custom orders, and bulk discounts. Response within 24 hours." data-zh="联系我们的B2B团队，获取批发价格、定制订单和批量折扣。24小时内回复。">联系我们的B2B团队，获取批发价格、定制订单和批量折扣。24小时内回复。</p>
+<button class="mt-2 btn-primary px-4 py-1.5 rounded-lg text-xs font-medium" data-en="Send Inquiry" data-zh="发送询盘" onclick="openInquiryModal()">发送询盘</button>
+</div>
+</div>
+</section>
+<!-- ===== Testimonials ===== -->
+<section class="px-3 pt-5 pb-2">
+<h3 class="font-bold text-base text-gray-800 mb-4" data-en="What Our Customers Say" data-zh="客户评价">客户评价</h3>
+<div class="relative bg-gradient-to-br from-[#1E3A5F] to-[#2d4a7a] rounded-2xl p-5 text-white min-h-[200px]">
+<!-- Testimonial 1 -->
+<div class="testimonial-card active" data-index="0">
+<div class="flex items-center gap-1 mb-3">
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+</div>
+<p class="text-sm leading-relaxed italic text-white/90" data-en='"Excellent quality industrial supplies at competitive prices. Delivery to Kumasi was faster than expected!"' data-zh='"以有竞争力的价格提供优质的工业耗材。发往库马西的配送比预期快得多！"'>"以有竞争力的价格提供优质的工业耗材。发往库马西的配送比预期快得多！"</p>
+<div class="mt-3 flex items-center gap-2">
+<div class="w-8 h-8 bg-[#F7B500] rounded-full flex items-center justify-center text-[#1E3A5F] font-bold text-sm">SK</div>
+<div>
+<p class="text-sm font-semibold">Samuel K.</p>
+<p class="text-[10px] text-white/60" data-en="Accra Construction Co." data-zh="阿克拉建筑公司">阿克拉建筑公司</p>
+</div>
+</div>
+</div>
+<!-- Testimonial 2 -->
+<div class="testimonial-card" data-index="1">
+<div class="flex items-center gap-1 mb-3">
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+</div>
+<p 's采购工作手套和安全设备已超过一年，从未遇到任何质量或配送问题。"'="" 've="" a="" and="" any="" been="" class="text-sm leading-relaxed italic text-white/90" data-en='"We' data-zh='"我们向Li' delivery."'="" equipment="" for="" from="" gloves="" had="" issues="" li''s="" never="" or="" our="" over="" quality="" safety="" sourcing="" with="" work="" year.="">"我们向Li's采购工作手套和安全设备已超过一年，从未遇到任何质量或配送问题。"</p>
+<div class="mt-3 flex items-center gap-2">
+<div class="w-8 h-8 bg-[#F7B500] rounded-full flex items-center justify-center text-[#1E3A5F] font-bold text-sm">AM</div>
+<div>
+<p class="text-sm font-semibold">Aisha M.</p>
+<p class="text-[10px] text-white/60" data-en="Tema Logistics" data-zh="特马物流公司">特马物流公司</p>
+</div>
+</div>
+</div>
+<!-- Testimonial 3 -->
+<div class="testimonial-card" data-index="2">
+<div class="flex items-center gap-1 mb-3">
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-solid fa-star text-[#F7B500] text-sm"></i>
+<i class="fa-regular fa-star text-sm text-white/40"></i>
+</div>
+<p class="text-sm leading-relaxed italic text-white/90" data-en='"The MOMO payment makes it so convenient. Finally a supplier that understands the Ghanaian market."' data-zh='"MOMO支付非常方便。终于有供应商了解加纳市场的需求了。"'>"MOMO支付非常方便。终于有供应商了解加纳市场的需求了。"</p>
+<div class="mt-3 flex items-center gap-2">
+<div class="w-8 h-8 bg-[#F7B500] rounded-full flex items-center justify-center text-[#1E3A5F] font-bold text-sm">KO</div>
+<div>
+<p class="text-sm font-semibold">Kwame O.</p>
+<p class="text-[10px] text-white/60" data-en="Kumasi Workshop" data-zh="库马西工坊">库马西工坊</p>
+</div>
+</div>
+</div>
+<!-- Testimonial nav -->
+<div class="flex items-center justify-center gap-2 mt-4">
+<button class="w-2 h-2 rounded-full bg-[#F7B500] testimonial-dot active" data-index="0" onclick="goToTestimonial(0)"></button>
+<button class="w-2 h-2 rounded-full bg-white/40 testimonial-dot" data-index="1" onclick="goToTestimonial(1)"></button>
+<button class="w-2 h-2 rounded-full bg-white/40 testimonial-dot" data-index="2" onclick="goToTestimonial(2)"></button>
+</div>
+</div>
+</section>
+<!-- ===== Trust Badges ===== -->
+<section class="px-3 pt-5 pb-2">
+<h3 class="font-bold text-base text-gray-800 mb-4" data-en="Why Choose Li's Industrial Mart" data-zh="为什么选择 Li's Industrial Mart">为什么选择 Li's Industrial Mart</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center text-center">
+<iconify-icon class="text-3xl text-[#1E3A5F]" icon="mdi:package-variant-closed"></iconify-icon>
+<h5 class="text-sm font-bold text-gray-800 mt-2" data-en="500+ Products Available" data-zh="500+ 种产品可供选择">500+ 种产品可供选择</h5>
+<p class="text-[11px] text-gray-500 mt-1" data-en="Wide range of industrial supplies" data-zh="丰富的工业用品">丰富的工业用品</p>
+</div>
+<div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center text-center">
+<iconify-icon class="text-3xl text-[#1E3A5F]" icon="mdi:truck-delivery"></iconify-icon>
+<h5 class="text-sm font-bold text-gray-800 mt-2" data-en="Nationwide Delivery in Ghana" data-zh="加纳全国配送">加纳全国配送</h5>
+<p class="text-[11px] text-gray-500 mt-1" data-en="Reaching all regions" data-zh="覆盖所有地区">覆盖所有地区</p>
+</div>
+<div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center text-center">
+<iconify-icon class="text-3xl text-[#1E3A5F]" icon="mdi:account-group"></iconify-icon>
+<h5 class="text-sm font-bold text-gray-800 mt-2" data-en="10,000+ Happy Customers" data-zh="10,000+ 满意客户">10,000+ 满意客户</h5>
+<p class="text-[11px] text-gray-500 mt-1" data-en="Trusted by businesses" data-zh="深受企业信赖">深受企业信赖</p>
+</div>
+<div class="bg-gray-50 rounded-xl p-4 flex flex-col items-center text-center">
+<iconify-icon class="text-3xl text-[#1E3A5F]" icon="mdi:shield-check"></iconify-icon>
+<h5 class="text-sm font-bold text-gray-800 mt-2" data-en="Secure Payment with MTN MOMO" data-zh="MTN MOMO 安全支付">MTN MOMO 安全支付</h5>
+<p class="text-[11px] text-gray-500 mt-1" data-en="Safe &amp; convenient" data-zh="安全便捷">安全便捷</p>
+</div>
+</div>
+</section>
+<!-- ===== CTA Section ===== -->
+<section class="mx-3 mt-6 rounded-2xl overflow-hidden" style="background: #1E3A5F;">
+<div class="px-6 py-8 text-center">
+<h3 class="text-white text-xl font-bold" data-en="Ready to Start Ordering?" data-zh="准备好开始下单了吗？">准备好开始下单了吗？</h3>
+<p class="text-white/70 text-sm mt-2 leading-relaxed" data-en="Join thousands of businesses across Ghana trusting Li's Industrial Mart" data-zh="加入加纳数千家信赖 Li's Industrial Mart 的企业">加入加纳数千家信赖 Li's Industrial Mart 的企业</p>
+<div class="flex items-center justify-center gap-3 mt-5">
+<a class="btn-gold px-5 py-2 rounded-full text-sm font-bold transition inline-block" data-en="Contact Us" data-zh="联系我们" href="#">联系我们</a>
+<a class="px-5 py-2 rounded-full text-sm font-bold transition inline-block text-white border-2 border-white/60 hover:bg-white/10" data-en="Browse Products" data-zh="浏览商品" href="#">浏览商品</a>
+</div>
+</div>
+</section>
+<!-- ===== Footer ===== -->
+<footer class="px-4 pt-6 pb-4 mt-6 border-t border-gray-200 bg-white">
+<div class="text-center">
+<img alt="Li's Industrial Mart logo" class="h-8 w-auto mx-auto mb-3" src="https://modao.cc/agent-py/workspace/6a1ab2152b1d8246008be26b/ghana-store_v6.html/logo.svg"/>
+<p class="text-xs text-gray-500 leading-relaxed max-w-[280px] mx-auto" data-en="Your trusted partner for industrial supplies and equipment across Ghana. Quality products, reliable service." data-zh="您信赖的加纳工业用品与设备合作伙伴。优质产品，可靠服务。">您信赖的加纳工业用品与设备合作伙伴。优质产品，可靠服务。</p>
+<div class="mt-4 space-y-1.5 text-xs text-gray-500">
+<p><iconify-icon class="inline text-[#1E3A5F] mr-1" icon="mdi:phone"></iconify-icon>+233 XX XXX XXXX</p>
+<p><iconify-icon class="inline text-[#1E3A5F] mr-1" icon="mdi:email-outline"></iconify-icon>info@lisindustrialmart.com</p>
+<p><iconify-icon class="inline text-[#1E3A5F] mr-1" icon="mdi:map-marker-outline"></iconify-icon>Accra, Ghana</p>
+</div>
+<div class="flex items-center justify-center gap-4 mt-4">
+<a class="w-8 h-8 bg-[#1E3A5F] rounded-full flex items-center justify-center text-white hover:bg-[#152d4a] transition" href="#"><i class="fa-brands fa-facebook-f text-sm"></i></a>
+<a class="w-8 h-8 bg-[#1E3A5F] rounded-full flex items-center justify-center text-white hover:bg-[#152d4a] transition" href="#"><i class="fa-brands fa-instagram text-sm"></i></a>
+<a class="w-8 h-8 bg-[#1E3A5F] rounded-full flex items-center justify-center text-white hover:bg-[#152d4a] transition" href="#"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+</div>
+</div>
+<!-- Quick Links + Customer Service + Newsletter -->
+<div class="mt-5 grid grid-cols-2 gap-4 border-t border-gray-100 pt-4">
+<div>
+<h6 class="text-xs font-bold text-gray-800 mb-2" data-en="Quick Links" data-zh="快速链接">快速链接</h6>
+<ul class="space-y-1.5 text-[11px] text-gray-500">
+<li><a class="hover:text-[#1E3A5F]" data-en="Home" data-zh="首页" href="home.html">首页</a></li>
+<li><a class="hover:text-[#1E3A5F]" data-en="Products" data-zh="商品列表" href="#" onclick="showViewAllToast(event)">商品列表</a></li>
+<li><a class="hover:text-[#1E3A5F]" data-en="Cart" data-zh="购物车" href="cart.html">购物车</a></li>
+<li><a class="hover:text-[#1E3A5F]" data-en="Contact Us" data-zh="联系我们" href="#">联系我们</a></li>
+</ul>
+</div>
+<div>
+<h6 class="text-xs font-bold text-gray-800 mb-2" data-en="Customer Service" data-zh="客户服务">客户服务</h6>
+<ul class="space-y-1.5 text-[11px] text-gray-500">
+<li><a class="hover:text-[#1E3A5F]" data-en="FAQ" data-zh="常见问题" href="#">常见问题</a></li>
+<li><a class="hover:text-[#1E3A5F]" data-en="Shipping Info" data-zh="配送信息" href="#">配送信息</a></li>
+<li><a class="hover:text-[#1E3A5F]" data-en="7-Day Return Policy" data-zh="7天退换政策" href="#">7天退换政策</a></li>
+<li><a class="hover:text-[#1E3A5F]" data-en="Privacy Policy" data-zh="隐私政策" href="#">隐私政策</a></li>
+</ul>
+</div>
+</div>
+<div class="mt-4 border-t border-gray-100 pt-4">
+<h6 class="text-xs font-bold text-gray-800 mb-2" data-en="Newsletter" data-zh="订阅资讯">订阅资讯</h6>
+<div class="flex gap-2">
+<input class="flex-1 h-9 bg-gray-100 rounded-lg px-3 text-xs outline-none focus:ring-1 focus:ring-[#F7B500]" id="newsletterInput" placeholder="your@email.com" type="email"/>
+<button class="btn-primary px-4 h-9 rounded-lg text-xs font-medium" data-en="Subscribe" data-zh="订阅" onclick="subscribeNewsletter()">订阅</button>
+</div>
+</div>
+<p class="text-[10px] text-gray-400 mt-4 text-center">© 2026 Li's Industrial Mart. All rights reserved.</p>
+</footer>
+<!-- ===== Bottom Tab Navigation ===== -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-[375px] max-w-[480px] bg-white border-t border-gray-100 px-2 py-1.5 flex items-center justify-around z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+<a class="active-tab flex flex-col items-center gap-0.5" href="home.html">
+<iconify-icon class="text-xl" icon="mdi:home"></iconify-icon>
+<span class="tab-label text-[10px] font-medium" data-en="Home" data-zh="首页">首页</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-gray-400" href="#">
+<iconify-icon class="text-xl" icon="mdi:shape-outline"></iconify-icon>
+<span class="tab-label text-[10px] font-medium" data-en="Categories" data-zh="分类">分类</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-gray-400 relative" href="cart.html">
+<iconify-icon class="text-xl" icon="mdi:cart-outline"></iconify-icon>
+<span class="absolute -top-0.5 -right-2 bg-red-500 text-white text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">3</span>
+<span class="tab-label text-[10px] font-medium" data-en="Cart" data-zh="购物车">购物车</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-gray-400" href="order-detail.html">
+<iconify-icon class="text-xl" icon="mdi:clipboard-list-outline"></iconify-icon>
+<span class="tab-label text-[10px] font-medium" data-en="Orders" data-zh="订单">订单</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 text-gray-400" href="#">
+<iconify-icon class="text-xl" icon="mdi:account-circle-outline"></iconify-icon>
+<span class="tab-label text-[10px] font-medium" data-en="Account" data-zh="我的">我的</span>
+</a>
+</nav>
+<!-- Toast -->
+<div class="toast" id="toast">已加入购物车 ✅</div>
+<!-- Inquiry Modal -->
+<div class="modal-overlay" id="inquiryModal">
+<div class="modal-box">
+<span class="modal-close" onclick="closeInquiryModal()">×</span>
+<h3 data-en="Send Inquiry" data-zh="发送询盘">发送询盘</h3>
+<input id="inquiryName" placeholder="姓名 *" type="text"/>
+<input id="inquiryPhone" placeholder="手机号 (+233)" type="text" value="+233 "/>
+<input id="inquiryCompany" placeholder="公司名称" type="text"/>
+<textarea id="inquiryDesc" placeholder="需求描述 *"></textarea>
+<button class="btn-primary w-full py-2.5 rounded-lg text-sm font-medium" data-en="Submit" data-zh="提交询盘" onclick="submitInquiry()">提交询盘</button>
+</div>
+</div>
+</div>
+<!-- WhatsApp Float Button -->
+<div class="whatsapp-float">
+<div class="whatsapp-popup" id="whatsappPopup">
+<div class="popup-header">
+<iconify-icon class="inline mr-1" icon="mdi:whatsapp"></iconify-icon>
+Chat with us
+</div>
+<div class="popup-body">
+<p>Chat with us on WhatsApp</p>
+<p class="phone">+233 50 123 4567</p>
+<a class="btn-send" href="https://wa.me/233501234567" target="_blank">
+<iconify-icon class="inline mr-1" icon="mdi:whatsapp"></iconify-icon>
+Send Message
+</a>
+</div>
+</div>
+<button class="whatsapp-btn" onclick="toggleWhatsApp(event)">
+<iconify-icon icon="mdi:whatsapp"></iconify-icon>
+</button>
+</div>
+<script>
+// ===== Carousel =====
+let currentSlide = 0;
+const totalSlides = 3;
+let autoTimer = null;
+
+function showSlide(index) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    slides.forEach((s, i) => {
+        s.classList.toggle('opacity-0', i !== index);
+    });
+    document.querySelectorAll('#carousel [id^="dot"]').forEach((dot, i) => {
+        dot.className = i === index
+            ? 'w-4 h-1.5 bg-[#F7B500] rounded-full border-0 cursor-pointer'
+            : 'w-1.5 h-1.5 bg-white/50 rounded-full border-0 cursor-pointer';
+    });
+    currentSlide = index;
+}
+
+function nextSlide(e) { if (e) { e.preventDefault(); } resetAuto(); showSlide((currentSlide + 1) % totalSlides); }
+function prevSlide(e) { if (e) { e.preventDefault(); } resetAuto(); showSlide((currentSlide + totalSlides - 1) % totalSlides); }
+function goToSlide(index) { resetAuto(); showSlide(index); }
+
+function resetAuto() {
+    if (autoTimer) clearInterval(autoTimer);
+    autoTimer = setInterval(() => { showSlide((currentSlide + 1) % totalSlides); }, 4000);
+}
+autoTimer = setInterval(() => { showSlide((currentSlide + 1) % totalSlides); }, 4000);
+
+// ===== Search Suggest =====
+function showSearchSuggest() {
+    document.getElementById('searchSuggest').classList.add('show');
+}
+function hideSearchSuggest() {
+    setTimeout(() => {
+        document.getElementById('searchSuggest').classList.remove('show');
+    }, 200);
+}
+
+// ===== Add to Cart Toast =====
+function addToCart(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    showToast('已加入购物车 ✅');
+}
+
+// ===== View All Toast =====
+function showViewAllToast(e) {
+    if (e) e.preventDefault();
+    const lang = localStorage.getItem('site_lang') || 'zh';
+    showToast(lang === 'zh' ? '更多商品即将上线' : 'More products coming soon');
+}
+
+// ===== Toast Helper =====
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 2000);
+}
+
+// ===== Language Switcher =====
+let currentLang = localStorage.getItem('site_lang') || 'zh';
+
+function toggleLangDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('langDropdown').classList.toggle('show');
+}
+
+function switchLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('site_lang', lang);
+    document.getElementById('langLabel').textContent = lang === 'zh' ? '中' : 'EN';
+    document.getElementById('langDropdown').classList.remove('show');
+
+    // Update all data-zh/data-en elements
+    document.querySelectorAll('[data-zh][data-en]').forEach(el => {
+        if (lang === 'zh') {
+            el.innerHTML = el.getAttribute('data-zh');
+        } else {
+            el.innerHTML = el.getAttribute('data-en');
+        }
+    });
+
+    // Update lang dropdown active state
+    document.querySelectorAll('#langDropdown div[data-lang]').forEach(item => {
+        item.classList.toggle('active', item.getAttribute('data-lang') === lang);
+    });
+}
+
+// Close lang dropdown on outside click
+document.addEventListener('click', function(e) {
+    const dd = document.getElementById('langDropdown');
+    if (dd && dd.classList.contains('show')) {
+        dd.classList.remove('show');
+    }
+});
+
+// ===== Initialize Language =====
+document.addEventListener('DOMContentLoaded', function() {
+    switchLang(currentLang);
+});
+
+// ===== WhatsApp =====
+function toggleWhatsApp(e) {
+    e.stopPropagation();
+    document.getElementById('whatsappPopup').classList.toggle('show');
+}
+document.addEventListener('click', function() {
+    const popup = document.getElementById('whatsappPopup');
+    if (popup && popup.classList.contains('show')) {
+        popup.classList.remove('show');
+    }
+});
+
+// ===== Testimonials =====
+let currentTestimonial = 0;
+const totalTestimonials = 3;
+
+function goToTestimonial(index) {
+    const cards = document.querySelectorAll('.testimonial-card');
+    const dots = document.querySelectorAll('.testimonial-dot');
+    cards.forEach((c, i) => c.classList.toggle('active', i === index));
+    dots.forEach((d, i) => {
+        d.classList.toggle('active', i === index);
+        d.style.background = i === index ? '#F7B500' : 'rgba(255,255,255,0.4)';
+    });
+    currentTestimonial = index;
+}
+
+// Auto-rotate testimonials
+let testimonialTimer = setInterval(() => {
+    goToTestimonial((currentTestimonial + 1) % totalTestimonials);
+}, 5000);
+
+// ===== Inquiry Modal =====
+function openInquiryModal() {
+    document.getElementById('inquiryModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeInquiryModal() {
+    document.getElementById('inquiryModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+function submitInquiry() {
+    const name = document.getElementById('inquiryName').value.trim();
+    const desc = document.getElementById('inquiryDesc').value.trim();
+    if (!name) { showToast(currentLang === 'zh' ? '请填写姓名' : 'Please enter your name'); return; }
+    if (!desc) { showToast(currentLang === 'zh' ? '请填写需求描述' : 'Please describe your inquiry'); return; }
+    closeInquiryModal();
+    document.getElementById('inquiryName').value = '';
+    document.getElementById('inquiryDesc').value = '';
+    const msg = currentLang === 'zh' ? '询盘已提交！我们将在24小时内与您联系。' : 'Inquiry submitted! We\'ll contact you within 24 hours.';
+    showToast(msg);
+}
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('inquiryModal');
+    if (modal && modal.classList.contains('show') && e.target === modal) {
+        closeInquiryModal();
+    }
+});
+
+// ===== Newsletter =====
+function subscribeNewsletter() {
+    const input = document.getElementById('newsletterInput');
+    if (!input.value.trim()) {
+        showToast(currentLang === 'zh' ? '请输入邮箱地址' : 'Please enter your email');
+        return;
+    }
+    input.value = '';
+    showToast(currentLang === 'zh' ? '订阅成功！' : 'Subscribed successfully!');
+}
+
+// ===== Header Scroll Shadow =====
+const header = document.getElementById('mainHeader');
+window.addEventListener('scroll', function() {
+    if (window.scrollY > 10) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+});
+</script>
+</body>
+</html>
