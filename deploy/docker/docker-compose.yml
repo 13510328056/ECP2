@@ -1,0 +1,11 @@
+services:
+  ecp2:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: ecp2-mart
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
