@@ -1,0 +1,37 @@
+# ECP2 - Caddy 配置
+# 一行搞定 SPA 静态文件服务器
+
+:8080 {
+    # 静态文件目录
+    root * /volume1/docker/ecp2/dist
+
+    # SPA fallback：所有非文件请求都返回 index.html
+    try_files {path} /index.html
+
+    # 启用 Gzip
+    encode gzip
+
+    # 静态资源缓存
+    header /assets/* Cache-Control "public, immutable, max-age=31536000"
+    header /images/* Cache-Control "public, immutable, max-age=2592000"
+
+    # 安全头部
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+    }
+
+    # 访问日志（可选）
+    @log {
+        not path /favicon.ico
+    }
+    log {
+        output file /volume1/docker/ecp2/access.log {
+            roll_size 10mb
+            roll_keep 3
+        }
+    }
+
+    # 文件服务器
+    file_server
+}
