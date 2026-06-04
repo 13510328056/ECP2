@@ -1,7 +1,7 @@
 services:
   ecp2:
     build:
-      context: ..
+      context: ../..
       dockerfile: deploy/docker/Dockerfile
     container_name: ecp2-mart
     ports:
